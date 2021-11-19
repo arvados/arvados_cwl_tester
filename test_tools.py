@@ -1,6 +1,6 @@
 import os
 
-from tools import load_file, run_cwl, create_output_dir, extract_docker_tag, get_list_of_images, check_if_docker_exists_locally
+from tools import load_file, run_cwl, create_output_dir, extract_docker_tag, get_list_of_images
 
 
 def test_load_file():
