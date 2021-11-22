@@ -1,6 +1,7 @@
 cwlVersion: v1.0
 class: Workflow
-
+doc: some documentation
+label: Example pipeline
 hints:
   DockerRequirement:
     dockerPull: ubuntu:20.04
@@ -8,6 +9,7 @@ hints:
 inputs:
   name:
     type: string
+    doc: Some description needed as obligatory in pipeline
 
 steps:
   single_step:
