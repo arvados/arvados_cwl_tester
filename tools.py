@@ -2,10 +2,10 @@
 
 # TODO check if file exists and do not push if yes
 import datetime
-import json
 import os
 import yaml
 import docker
+import filecmp
 
 
 class colors:
@@ -28,7 +28,7 @@ def extract_docker_tag(line: str) -> str:
     phrase_starts = line.find("dockerPull:")
     length = len("dockerPull:")
     after = line[phrase_starts + length:]
-    print(colors.OKBLUE + f"\n Dockerpull requirement: {after.strip()}")
+    print(colors.OKBLUE + f"\nINFO: Dockerpull requirement: {after.strip()}")
     return after.strip()
 
 
@@ -49,7 +49,7 @@ def get_list_of_images():
 
 def build_docker_image(dockerfile_path: str, tag: str):
     CLIENT.images.build(path=dockerfile_path, tag=tag)
-    print(colors.OKBLUE + f"\n Building docker image {tag} based on {dockerfile_path}")
+    print(colors.OKBLUE + f"\nINFO: Building docker image {tag} based on {dockerfile_path}")
 
 
 def get_cwl_name_from_path(cwl_path):
@@ -66,7 +66,7 @@ def setup_docker_image(cwl_path: str):
     tag = take_image_tag_from_cwl(cwl_path)
     images = get_list_of_images()
     if tag in images:
-        print(colors.OKBLUE + f"\n Docker image {tag} exists locally")
+        print(colors.OKBLUE + f"\nINFO: Docker image {tag} exists locally")
         return
     # pull from dockerhub
     # pull from gitlab
@@ -111,52 +111,81 @@ def convert_cwl_to_dict(cwl_path):
         return yaml.full_load(cwl)
 
 
-def check_element(key_name, data, name, pipeline: bool):
+def check_key_in_cwl(key_name, data, name, pipeline: bool):
     if key_name in data:
-        print(colors.OKGREEN + f"{name} contains {key_name}")
+        print(colors.OKGREEN + f"\nPASSED: {name} contains {key_name}")
         return
     if pipeline:
-        raise Exception(print(colors.ERROR + f"{name} pipeline does not contain {key_name}"))
-    print(colors.WARNING + f"{name} does not contain {key_name}")
+        raise Exception(print(colors.ERROR + f"\nERROR: {name} pipeline does not contain {key_name}"))
+    print(colors.WARNING + f"\nWARNING: {name} does not contain {key_name}")
+    return
+
+
+def load_version(steps_path: str) -> str:
+    return convert_cwl_to_dict(steps_path)["cwlVersion"]
+
+
+def check_if_cwl_versions_are_the_same(cwl_data: dict):
+    cwl_versions = {}
+    cwl_versions["main_pipeline"] = cwl_data["cwlVersion"]
+    if "steps" in cwl_data:
+        for step_name, values in cwl_data["steps"].items():
+            cwl_versions[cwl_data["steps"][step_name]["run"]]= load_version(values["run"])
+        first = list(cwl_versions.values())[0]
+        for cwl, version in cwl_versions.items():
+            if version == first:
+                next
+            else:
+                #TODO decide if make exception or print error
+                # raise Exception(
+                #     f"Pipeline: '{cwl}' has different version than the rest used in pipeline: {cwl_versions}"
+                # )
+                print(colors.ERROR + f"\nERROR: Pipeline: '{cwl}' has different version than the rest used in pipeline: {cwl_versions}")
     return
 
 
 def validate_cwl_metadata(path, pipeline=False):
     cwl_data = convert_cwl_to_dict(path)
     for key_name in ["label", "doc", "hints", "inputs", "outputs"]:
-        check_element(key_name, cwl_data, f"Cwl script {path}", pipeline)
+        check_key_in_cwl(key_name, cwl_data, f"Cwl script {path}", pipeline)
     for i in cwl_data["inputs"]:
-        check_element("doc", cwl_data["inputs"][i], f"Input '{i}' for Cwl script {path}", pipeline)
+        check_key_in_cwl("doc", cwl_data["inputs"][i], f"Input '{i}' for Cwl script {path}", pipeline)
+    check_if_cwl_versions_are_the_same(cwl_data)
 
 
 def run_cwl(cwl_path: str, inputs_dictionary):
-    print(colors.RUNNING + f"\n Running cwl workflow: {cwl_path}...")
+    print(colors.RUNNING + f"\n INFO: Running cwl workflow: {cwl_path}...")
     create_input_yml(inputs_dictionary)
     basedir = "/tmp"
     cwl_name = get_cwl_name_from_path(cwl_path)
     outdir = create_output_dir(cwl_name)
-    os.system(f"cwl-runner --js-console --move-outputs --basedir {basedir} --outdir {outdir} {cwl_path} ./.input.yml")
+    os.system(f"cwl-runner --move-outputs --basedir {basedir} --outdir {outdir} {cwl_path} ./.input.yml")
     result = {
         "cwl": cwl_path,
         "inputs": inputs_dictionary,
         "outputdir": outdir,
         "list_of_outputs": create_list_of_files_in_dir(outdir)
     }
-    print(json.dumps(result, indent=4))
     return result
-
 
 
 def check_if_file_exists(path) -> bool:
     return os.path.isfile(path)
 
 
-
 def check_file_does_not_exists(path) -> bool:
     return not os.path.isfile(path)
-#
 
-#
+
+def compare_result_with_expected(result_path, expected_path) -> bool:
+    return filecmp.cmp(result_path, expected_path)
+
+
+# def validate_outputs(info_dict: dict):
+#     for output in info_dict():
+#         if
+
+
 # def create_test_name_on_arvados():
 #     # task_name, date and time
 #
@@ -166,14 +195,4 @@ def check_file_does_not_exists(path) -> bool:
 #     # how to check outputs?? there are no in /tmp anymore
 #     # if in arvados do not check /tmp and make any /tmp issues
 #
-#
-# if __main__():
-#     argparse():
-# project_id, optional. If provided cwl will run on arvados
-# clean optional - cleans all tmp
-# input_yml
-# if_exists_outputs - list of outputs to check if exists
-# if does not exists outputs - list of outputs should do not exists
-# build - builds all docker images based on dockerfiles
 
-# maybe something about resources

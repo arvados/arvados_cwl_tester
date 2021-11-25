@@ -1,8 +1,4 @@
-import os
-
-from tools import load_file, run_cwl, create_output_dir, extract_docker_tag, get_list_of_images, setup_docker_image, \
-    build_docker_image, CLIENT, generate_path_to_docker, colors, create_input_yml, validate_cwl_metadata
-
+from tools import *
 
 def test_load_file():
     assert type(load_file("./docker/single_step/Dockerfile")) == list
@@ -25,7 +21,7 @@ def test_build_docker_image():
     tag = "test:latest"
     images = get_list_of_images()
     if tag in images:
-        print(colors.TESTING_INFO + f"\n Removing docker image {tag} for testing...")
+        print(colors.TESTING_INFO + f"\nTESTING INFO: Removing docker image {tag} for testing...")
         CLIENT.images.remove(tag)
     build_docker_image("./docker/test/", tag)
 
@@ -35,7 +31,18 @@ def test_setup_docker_image():
 
 
 def test_create_input_yml():
-    create_input_yml({"name": "example.txt", "path": "some"})
+    create_input_yml(
+        {
+            "metaInfoFile": {
+                "class": "File",
+                "location": "keep:b05083d7db79c2e4e211dbef369e98a7+76/sampleList_E-MTAB-8208.txt",
+            },
+            "fastqCollection": {
+                "class": "File",
+                "location": "keep:00780063929dcd34186ae2394505202d+422439",
+            }
+        }
+    )
 
 
 def test_run_cwl():
@@ -48,6 +55,15 @@ def test_create_output_dir():
     assert os.path.isdir("/tmp/test") is True
 
 
+def test_load_version():
+    assert load_version("./example_pipeline.cwl") == "v1.0"
+
+
+def test_check_if_cwl_versions_are_the_same():
+    # assert check_if_cwl_versions_are_the_same(convert_cwl_to_dict("./example_pipeline.cwl")) is False -> this should fail as exception
+    assert check_if_cwl_versions_are_the_same(convert_cwl_to_dict("./components/single_step/single_step.cwl")) is None
+
+
 def test_validate_metadata_component():
     validate_cwl_metadata("./components/single_step/single_step.cwl")
 
@@ -55,3 +71,12 @@ def test_validate_metadata_component():
 def test_validate_cwl_metadata_pipeline():
     validate_cwl_metadata("./example_pipeline.cwl", pipeline=True)
 
+
+def test_validate_outputs():
+    output_data = {
+
+    }
+    info_dict = {
+
+    }
+    validate_outputs(output_data, info_dict)
