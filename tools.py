@@ -48,8 +48,30 @@ def get_list_of_images():
 
 
 def build_docker_image(dockerfile_path: str, tag: str):
-    CLIENT.images.build(path=dockerfile_path, tag=tag)
     print(colors.OKBLUE + f"\nINFO: Building docker image {tag} based on {dockerfile_path}")
+    CLIENT.images.build(path=dockerfile_path, tag=tag)
+
+
+def search_docker_in_dockerhub(tag: str):
+    print(colors.OKBLUE + f"\nINFO: Searching docker image {tag} on DockerHub")
+    images = CLIENT.images.search(tag)
+    if len(images) == 0:
+        return False, images
+    return True, images
+
+
+def select_most_popular_official_image(images):
+    for image in images:
+        if image["is_official"]:
+            return image["name"]
+        else:
+            print(colors.WARNING + f"\nWARNING: found image {image['name']} is not official")
+            return image['name']
+
+
+def pull_docker_from_dockerhub(tag: str):
+    print(colors.OKBLUE + f"\nINFO: Pulling docker image {tag} from DockerHub")
+    CLIENT.images.pull(tag)
 
 
 def get_cwl_name_from_path(cwl_path):
@@ -57,9 +79,20 @@ def get_cwl_name_from_path(cwl_path):
     return os.path.basename(pathname)
 
 
-def generate_path_to_docker(cwl_path):
+def pwd(path_to_file):
+    return os.path.dirname(os.path.abspath(path_to_file))
+
+
+def generate_path_to_dockerfile(cwl_path):
     cwl_name = get_cwl_name_from_path(cwl_path)
-    return f"./docker/{cwl_name}/Dockerfile"
+    dir = pwd(cwl_path)
+    docker = f"{dir}/docker/{cwl_name}/Dockerfile"
+    if os.path.exists(docker):
+        return docker
+    docker = f"{dir}/../../docker/{cwl_name}/Dockerfile"
+    if os.path.exists(docker):
+        return docker
+    return False
 
 
 def setup_docker_image(cwl_path: str):
@@ -68,9 +101,13 @@ def setup_docker_image(cwl_path: str):
     if tag in images:
         print(colors.OKBLUE + f"\nINFO: Docker image {tag} exists locally")
         return
-    # pull from dockerhub
-    # pull from gitlab
-    build_docker_image(generate_path_to_docker(cwl_path), tag)
+    dockerhub, images = search_docker_in_dockerhub
+    if dockerhub:
+        pull_docker_from_dockerhub(select_most_popular_official_image(images))
+    if not generate_path_to_dockerfile(cwl_path):
+        raise Exception(f"{tag} image included in DockerRequirement in {cwl_path} does not exists locally, in DockerHub and there is not Dockerfile in repository")
+    build_docker_image(generate_path_to_dockerfile(cwl_path), tag)
+
 
 
 def create_output_dir_name(cwl_name: str) -> str:
@@ -80,6 +117,9 @@ def create_output_dir_name(cwl_name: str) -> str:
 def create_output_dir(dir_name_same_as_cwl: str):
     outdir = create_output_dir_name(dir_name_same_as_cwl)
     path = os.path.join("/tmp", dir_name_same_as_cwl, outdir)
+    cwl_name = os.path.join("/tmp", dir_name_same_as_cwl)
+    if not os.path.exists(cwl_name):
+        os.mkdir(cwl_name)
     if os.path.exists(path):
         return path
     os.mkdir(path)
@@ -112,12 +152,15 @@ def convert_cwl_to_dict(cwl_path):
 
 
 def check_key_in_cwl(key_name, data, name, pipeline: bool):
+    pipeline_info = ""
+    if pipeline:
+        pipeline_info = "PIPELINE "
     if key_name in data:
-        print(colors.OKGREEN + f"\nPASSED: {name} contains {key_name}")
+        print(colors.OKGREEN + f"\n{key_name.upper()} {pipeline_info}PASSED: {name} contains {key_name}")
         return
     if pipeline:
-        raise Exception(print(colors.ERROR + f"\nERROR: {name} pipeline does not contain {key_name}"))
-    print(colors.WARNING + f"\nWARNING: {name} does not contain {key_name}")
+        raise Exception(print(colors.ERROR + f"\n{key_name.upper()} {pipeline_info}ERROR: {name} pipeline does not contain {key_name}"))
+    print(colors.WARNING + f"\n{key_name.upper()} WARNING: {name} does not contain {key_name}")
     return
 
 
@@ -146,11 +189,17 @@ def check_if_cwl_versions_are_the_same(cwl_data: dict):
 
 def validate_cwl_metadata(path, pipeline=False):
     cwl_data = convert_cwl_to_dict(path)
+    print(colors.RUNNING + f"\n##### Validation of cwl fields for pipepiline: '{path}' #####")
     for key_name in ["label", "doc", "hints", "inputs", "outputs"]:
         check_key_in_cwl(key_name, cwl_data, f"Cwl script {path}", pipeline)
     for i in cwl_data["inputs"]:
         check_key_in_cwl("doc", cwl_data["inputs"][i], f"Input '{i}' for Cwl script {path}", pipeline)
     check_if_cwl_versions_are_the_same(cwl_data)
+
+
+def get_outputs(path):
+    cwl_data = convert_cwl_to_dict(path)
+    return list(cwl_data["outputs"].keys())
 
 
 def run_cwl(cwl_path: str, inputs_dictionary):

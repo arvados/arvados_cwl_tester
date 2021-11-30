@@ -1,5 +1,6 @@
 from tools import *
 
+
 def test_load_file():
     assert type(load_file("./docker/single_step/Dockerfile")) == list
 
@@ -13,8 +14,13 @@ def test_get_list_of_images():
     assert len(get_list_of_images()) > 0
 
 
-def test_generate_path_to_docker():
-    assert generate_path_to_docker("./components/single_step/single_step.cwl") == "./docker/single_step/Dockerfile"
+def test_pull_docker_from_dockerhub():
+    pull_docker_from_dockerhub("ubuntu")
+
+
+def test_search_docker_in_dockerhub():
+    assert search_docker_in_dockerhub("this_does_not_exists_in_dockerhub")[0] == False
+    assert search_docker_in_dockerhub("ubuntu")[0] == True
 
 
 def test_build_docker_image():
@@ -72,11 +78,22 @@ def test_validate_cwl_metadata_pipeline():
     validate_cwl_metadata("./example_pipeline.cwl", pipeline=True)
 
 
-def test_validate_outputs():
-    output_data = {
+def test_get_outputs():
+    assert get_outputs("./components/single_step/single_step.cwl") == ['testing_result']
 
-    }
-    info_dict = {
 
-    }
-    validate_outputs(output_data, info_dict)
+# def test_validate_cwl_metadata_pipeline():
+#     validate_cwl_metadata("../arvados-workflow-sentieon/sentieon-germline-gvcf_multi-cohort.cwl", pipeline=True)
+
+
+# def test_validate_outputs():
+#     output_data = {
+#         "output1": {
+#             "compare": path_to_compare,
+#             "validate_bam": True,
+#         }
+#     }
+#     info_dict = {
+#
+#     }
+#     validate_outputs(output_data, info_dict)
