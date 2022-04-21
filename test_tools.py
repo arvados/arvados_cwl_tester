@@ -65,11 +65,6 @@ def test_load_version():
     assert load_version("./example_pipeline.cwl") == "v1.0"
 
 
-def test_check_if_cwl_versions_are_the_same():
-    # assert check_if_cwl_versions_are_the_same(convert_cwl_to_dict("./example_pipeline.cwl")) is False -> this should fail as exception
-    assert check_if_cwl_versions_are_the_same(convert_cwl_to_dict("./components/single_step/single_step.cwl")) is None
-
-
 def test_validate_metadata_component():
     validate_cwl_metadata("./components/single_step/single_step.cwl")
 
@@ -97,3 +92,6 @@ def test_get_outputs():
 #
 #     }
 #     validate_outputs(output_data, info_dict)
+
+
+# TO DO - setup all docker images for whole project - for each cwl

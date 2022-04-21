@@ -3,7 +3,7 @@ class: CommandLineTool
 
 hints:
   DockerRequirement:
-    dockerPull: ubuntu:20.04
+    dockerPull: ubuntu:18.04
 
 baseCommand: [touch]
 

@@ -3,9 +3,13 @@
 # TODO check if file exists and do not push if yes
 import datetime
 import os
+from typing import Any
 import yaml
 import docker
 import filecmp
+from datetime import date, datetime
+import glob
+from cProfile import run
 
 
 class colors:
@@ -32,11 +36,12 @@ def extract_docker_tag(line: str) -> str:
     return after.strip()
 
 
-def take_image_tag_from_cwl(cwl_path) -> str:
+def take_image_tag_from_cwl(cwl_path) -> Any:
     lines = load_file(cwl_path)
     for line in lines:
         if "dockerPull" in line:
             return extract_docker_tag(line)
+    return False
 
 
 CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock')
@@ -96,12 +101,17 @@ def generate_path_to_dockerfile(cwl_path):
 
 
 def setup_docker_image(cwl_path: str):
+    # TODO unfortunately not all docker images are in dirname the same as component (example: sentieon).
+    # TODO Additionally building docker command in sentieon is not the same as here. This setup works only for "standard" repo structure
+    
     tag = take_image_tag_from_cwl(cwl_path)
+    if not tag:
+        return
     images = get_list_of_images()
     if tag in images:
         print(colors.OKBLUE + f"\nINFO: Docker image {tag} exists locally")
         return
-    dockerhub, images = search_docker_in_dockerhub
+    dockerhub, images = search_docker_in_dockerhub(tag)
     if dockerhub:
         pull_docker_from_dockerhub(select_most_popular_official_image(images))
     if not generate_path_to_dockerfile(cwl_path):
@@ -109,9 +119,15 @@ def setup_docker_image(cwl_path: str):
     build_docker_image(generate_path_to_dockerfile(cwl_path), tag)
 
 
+def setup_docker_images_for_all_cwl():
+    main_repo_dir = "../"
+    os.chdir(main_repo_dir)
+    for cwl_file in glob.glob("*.cwl"):
+        setup_docker_image(cwl_file)
+
 
 def create_output_dir_name(cwl_name: str) -> str:
-    return datetime.datetime.now().strftime(f"%H.%M.%S_%m.%d.%y")
+    return datetime.now().strftime(f"%H.%M.%S_%m.%d.%y")
 
 
 def create_output_dir(dir_name_same_as_cwl: str):
@@ -168,39 +184,25 @@ def load_version(steps_path: str) -> str:
     return convert_cwl_to_dict(steps_path)["cwlVersion"]
 
 
-def check_if_cwl_versions_are_the_same(cwl_data: dict):
-    cwl_versions = {}
-    cwl_versions["main_pipeline"] = cwl_data["cwlVersion"]
-    if "steps" in cwl_data:
-        for step_name, values in cwl_data["steps"].items():
-            cwl_versions[cwl_data["steps"][step_name]["run"]]= load_version(values["run"])
-        first = list(cwl_versions.values())[0]
-        for cwl, version in cwl_versions.items():
-            if version == first:
-                next
-            else:
-                #TODO decide if make exception or print error
-                # raise Exception(
-                #     f"Pipeline: '{cwl}' has different version than the rest used in pipeline: {cwl_versions}"
-                # )
-                print(colors.ERROR + f"\nERROR: Pipeline: '{cwl}' has different version than the rest used in pipeline: {cwl_versions}")
-    return
-
-
 def validate_cwl_metadata(path, pipeline=False):
     cwl_data = convert_cwl_to_dict(path)
     print(colors.RUNNING + f"\n##### Validation of cwl fields for pipepiline: '{path}' #####")
-    for key_name in ["label", "doc", "hints", "inputs", "outputs"]:
+    for key_name in ["label", "doc"]:
         check_key_in_cwl(key_name, cwl_data, f"Cwl script {path}", pipeline)
     for i in cwl_data["inputs"]:
         check_key_in_cwl("doc", cwl_data["inputs"][i], f"Input '{i}' for Cwl script {path}", pipeline)
-    check_if_cwl_versions_are_the_same(cwl_data)
+    return 
 
 
 def get_outputs(path):
     cwl_data = convert_cwl_to_dict(path)
     return list(cwl_data["outputs"].keys())
 
+def create_dict_for_input_file(name: str, resources) -> dict:
+    return {
+        "class": "File",
+        "path": os.path.join(resources, name)
+    }
 
 def run_cwl(cwl_path: str, inputs_dictionary):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow: {cwl_path}...")
@@ -208,40 +210,64 @@ def run_cwl(cwl_path: str, inputs_dictionary):
     basedir = "/tmp"
     cwl_name = get_cwl_name_from_path(cwl_path)
     outdir = create_output_dir(cwl_name)
-    os.system(f"cwl-runner --move-outputs --basedir {basedir} --outdir {outdir} {cwl_path} ./.input.yml")
-    result = {
-        "cwl": cwl_path,
-        "inputs": inputs_dictionary,
-        "outputdir": outdir,
-        "list_of_outputs": create_list_of_files_in_dir(outdir)
-    }
-    return result
+    os.system(f"cwl-runner --leave-tmpdir --debug --custom-net host --js-console --move-outputs --basedir {basedir} --outdir {outdir} {cwl_path} ./.input.yml")
+    print(colors.OKBLUE + f"Cwl running completed: {cwl_path}")
+    return outdir
+
+
+def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id):
+    print(colors.RUNNING + f"\n INFO: Running cwl workflow on arvados: {cwl_path}..., project_id: {project_id}")
+    create_input_yml(inputs_dictionary)
+    dt = f"{datetime.now()}"
+    os.system(f'arvados-cwl-runner --debug --name "Testing {dt} {cwl_path}" --project-uuid={project_id} --intermediate-output-ttl 604800 {cwl_path} ./.input.yml')
 
 
 def check_if_file_exists(path) -> bool:
-    return os.path.isfile(path)
+    exist = os.path.isfile(path)
+    if exist:
+        print(colors.OKGREEN + f"File {path} exists.")
+        return exist
+    print(colors.ERROR + f"File {path} does not exist. List of files:")
+    for file in glob.glob(os.path.dirname(path) + "/*"):
+        print(" - " + os.path.basename(file))
+    return exist
 
 
 def check_file_does_not_exists(path) -> bool:
     return not os.path.isfile(path)
 
 
+def check_file_is_not_empty(outdir, path) -> bool:
+    file = os.path.join(outdir, path)
+    if os.path.getsize(file) > 0:
+        return True
+    return False
+
+
 def compare_result_with_expected(result_path, expected_path) -> bool:
     return filecmp.cmp(result_path, expected_path)
 
 
-# def validate_outputs(info_dict: dict):
-#     for output in info_dict():
-#         if
+def check_files_in_out_dir(outdir: str, files: list) -> bool:
+    # TODO does it check all list for sure?
+
+    for file in files:
+        assert check_if_file_exists(os.path.join(outdir, f"{file}")) == True
+        # assert check_file_is_not_empty == True # TODO debug
 
 
-# def create_test_name_on_arvados():
-#     # task_name, date and time
-#
-#
-# def testing_on_arvados(project_id):
-#     # if project_id provided lets run on arvados
-#     # how to check outputs?? there are no in /tmp anymore
-#     # if in arvados do not check /tmp and make any /tmp issues
-#
+def how_many_variants_in_vcf(outdir: str, filename: str):
+    # TODO after setup py is completed lets do it by pysam
+    # TODO implement gzipped files
+    with open(os.path.join(outdir, filename),"r") as file:
+        variants = 0
+        for line in file:
+            if not "#" in line[0]:
+                variants += 1
+    print(colors.OKBLUE + f"{filename} contains {variants} variants.")
+    return variants
+
+
+
+
 
