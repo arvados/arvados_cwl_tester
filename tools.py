@@ -100,6 +100,7 @@ def generate_path_to_dockerfile(cwl_path):
     return False
 
 
+# main
 def setup_docker_image(cwl_path: str):
     # TODO unfortunately not all docker images are in dirname the same as component (example: sentieon).
     # TODO Additionally building docker command in sentieon is not the same as here. This setup works only for "standard" repo structure
@@ -127,7 +128,7 @@ def setup_docker_images_for_all_cwl():
 
 
 def create_output_dir_name(cwl_name: str) -> str:
-    return datetime.now().strftime(f"%H.%M.%S_%m.%d.%y")
+    return datetime.now().strftime(f"%H-%M-%S_%m-%d-%y")
 
 
 def create_output_dir(dir_name_same_as_cwl: str):
@@ -198,12 +199,15 @@ def get_outputs(path):
     cwl_data = convert_cwl_to_dict(path)
     return list(cwl_data["outputs"].keys())
 
+
 def create_dict_for_input_file(name: str, resources) -> dict:
     return {
         "class": "File",
         "path": os.path.join(resources, name)
     }
 
+
+# main
 def run_cwl(cwl_path: str, inputs_dictionary):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow: {cwl_path}...")
     create_input_yml(inputs_dictionary)
@@ -215,6 +219,7 @@ def run_cwl(cwl_path: str, inputs_dictionary):
     return outdir
 
 
+# main
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow on arvados: {cwl_path}..., project_id: {project_id}")
     create_input_yml(inputs_dictionary)
@@ -222,6 +227,7 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id):
     os.system(f'arvados-cwl-runner --debug --name "Testing {dt} {cwl_path}" --project-uuid={project_id} --intermediate-output-ttl 604800 {cwl_path} ./.input.yml')
 
 
+# main
 def check_if_file_exists(path) -> bool:
     exist = os.path.isfile(path)
     if exist:
@@ -233,10 +239,12 @@ def check_if_file_exists(path) -> bool:
     return exist
 
 
+# main
 def check_file_does_not_exists(path) -> bool:
     return not os.path.isfile(path)
 
 
+# main
 def check_file_is_not_empty(outdir, path) -> bool:
     file = os.path.join(outdir, path)
     if os.path.getsize(file) > 0:
@@ -244,10 +252,12 @@ def check_file_is_not_empty(outdir, path) -> bool:
     return False
 
 
+# main
 def compare_result_with_expected(result_path, expected_path) -> bool:
     return filecmp.cmp(result_path, expected_path)
 
 
+# main
 def check_files_in_out_dir(outdir: str, files: list) -> bool:
     # TODO does it check all list for sure?
 
@@ -256,6 +266,7 @@ def check_files_in_out_dir(outdir: str, files: list) -> bool:
         # assert check_file_is_not_empty == True # TODO debug
 
 
+# main
 def how_many_variants_in_vcf(outdir: str, filename: str):
     # TODO after setup py is completed lets do it by pysam
     # TODO implement gzipped files

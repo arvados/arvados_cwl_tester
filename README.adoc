@@ -1,0 +1,49 @@
+:toc:
+:toclevels: 4
+:sectnumlevels: 2
+:sectnums:
+:appversion: v1.0
+
+= BioCWL test
+
+== Introduction
+
+This is library prepared for running/testing cwl scripts using pytest, both locally and on arvados. This is beta version, in progress
+
+== Development of the library
+
+Main script, containing all functions is `tools.py`
+
+Test library during development using pytest configuration in code editor (Example: Pycharm, VScode) or command line:
+
+[source, bash]
+----
+pytest -s
+
+----
+
+Write additional tests in `test_tools.py`.
+
+There are additional directories: `docker` and `components` and file `example_pipeline.cwl` needed for testing library on some example cwl. Feel free to change the files to test new features. 
+
+==  Usage
+
+In beta version of library you need to copy `tools.py` to your repository. 
+Later create testing file, based on example: `test_example_usage.py` and you can use all functions from `tools.py` marked with comment `# main`.
+
+You can create testing functions for each cwl you want (workflows, commandlinetools, expressiontools) and run using VScode interface, or commandline:
+
+[source, bash]
+----
+
+# Run all tests in test_example_usage.py
+pytest test/test_example_usage.py -s 
+
+# Run single test
+pytest test/test_example_usage.py -s -k {some_keyword_in_fuction_name}
+
+#Example:
+pytest test/test_example_usage.py -s -k VarCal_apply
+----
+
+TIP: Use `cwltool --make-template {cwl_path}` to find out how to construct inputs. 

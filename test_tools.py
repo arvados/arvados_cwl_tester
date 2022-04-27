@@ -2,7 +2,7 @@ from tools import *
 
 
 def test_load_file():
-    assert type(load_file("./docker/single_step/Dockerfile")) == list
+    assert type(load_file("./docker/testing_image/Dockerfile")) == list
 
 
 def test_extract_docker_tag():
@@ -51,14 +51,14 @@ def test_create_input_yml():
     )
 
 
-def test_run_cwl():
-    inputs = {"name": "example.txt"}
-    run_cwl("components/single_step/single_step.cwl", inputs)
-
-
 def test_create_output_dir():
     create_output_dir("test")
     assert os.path.isdir("/tmp/test") is True
+
+
+def test_run_cwl(): # 
+    inputs = {"name": "example.txt"}
+    run_cwl("components/single_step/single_step.cwl", inputs)
 
 
 def test_load_version():
