@@ -7,9 +7,9 @@ from typing import Any
 import yaml
 import docker
 import filecmp
-from datetime import date, datetime
+from datetime import datetime
 import glob
-from cProfile import run
+import subprocess
 
 
 class colors:
@@ -100,11 +100,10 @@ def generate_path_to_dockerfile(cwl_path):
     return False
 
 
-# main
 def setup_docker_image(cwl_path: str):
     # TODO unfortunately not all docker images are in dirname the same as component (example: sentieon).
     # TODO Additionally building docker command in sentieon is not the same as here. This setup works only for "standard" repo structure
-    
+
     tag = take_image_tag_from_cwl(cwl_path)
     if not tag:
         return
@@ -116,7 +115,8 @@ def setup_docker_image(cwl_path: str):
     if dockerhub:
         pull_docker_from_dockerhub(select_most_popular_official_image(images))
     if not generate_path_to_dockerfile(cwl_path):
-        raise Exception(f"{tag} image included in DockerRequirement in {cwl_path} does not exists locally, in DockerHub and there is not Dockerfile in repository")
+        raise Exception(
+            f"{tag} image included in DockerRequirement in {cwl_path} does not exists locally, in DockerHub and there is not Dockerfile in repository")
     build_docker_image(generate_path_to_dockerfile(cwl_path), tag)
 
 
@@ -128,7 +128,7 @@ def setup_docker_images_for_all_cwl():
 
 
 def create_output_dir_name(cwl_name: str) -> str:
-    return datetime.now().strftime(f"%H-%M-%S_%m-%d-%y")
+    return datetime.now().strftime(f"%H:%M %y-%m-%d")
 
 
 def create_output_dir(dir_name_same_as_cwl: str):
@@ -176,7 +176,8 @@ def check_key_in_cwl(key_name, data, name, pipeline: bool):
         print(colors.OKGREEN + f"\n{key_name.upper()} {pipeline_info}PASSED: {name} contains {key_name}")
         return
     if pipeline:
-        raise Exception(print(colors.ERROR + f"\n{key_name.upper()} {pipeline_info}ERROR: {name} pipeline does not contain {key_name}"))
+        raise Exception(print(
+            colors.ERROR + f"\n{key_name.upper()} {pipeline_info}ERROR: {name} pipeline does not contain {key_name}"))
     print(colors.WARNING + f"\n{key_name.upper()} WARNING: {name} does not contain {key_name}")
     return
 
@@ -192,7 +193,7 @@ def validate_cwl_metadata(path, pipeline=False):
         check_key_in_cwl(key_name, cwl_data, f"Cwl script {path}", pipeline)
     for i in cwl_data["inputs"]:
         check_key_in_cwl("doc", cwl_data["inputs"][i], f"Input '{i}' for Cwl script {path}", pipeline)
-    return 
+    return
 
 
 def get_outputs(path):
@@ -207,27 +208,43 @@ def create_dict_for_input_file(name: str, resources) -> dict:
     }
 
 
-# main
 def run_cwl(cwl_path: str, inputs_dictionary):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow: {cwl_path}...")
     create_input_yml(inputs_dictionary)
     basedir = "/tmp"
     cwl_name = get_cwl_name_from_path(cwl_path)
     outdir = create_output_dir(cwl_name)
-    os.system(f"cwl-runner --leave-tmpdir --debug --custom-net host --js-console --move-outputs --basedir {basedir} --outdir {outdir} {cwl_path} ./.input.yml")
+    subprocess.run([
+        f"cwl-runner",
+        "--leave-tmpdir",
+        "--debug",
+        "--custom-net host",
+        "--js-console",
+        "--move-outputs",
+        f"--basedir {basedir}",
+        "--outdir", f"{outdir}",
+        f"{cwl_path}",
+        "./.input.yml"])
     print(colors.OKBLUE + f"Cwl running completed: {cwl_path}")
     return outdir
 
 
-# main
-def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id):
+def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, comment=None):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow on arvados: {cwl_path}..., project_id: {project_id}")
     create_input_yml(inputs_dictionary)
-    dt = f"{datetime.now()}"
-    os.system(f'arvados-cwl-runner --debug --name "Testing {dt} {cwl_path}" --project-uuid={project_id} --intermediate-output-ttl 604800 {cwl_path} ./.input.yml')
+    user = os.popen("git config user.name").read()
+    subprocess.run([
+        'arvados-cwl-runner',
+        "--debug",
+        "--name",
+        f"Testing {os.path.basename(cwl_path)} {user}",
+        f"--project-uuid={project_id}",
+        "--intermediate-output-ttl", "604800",
+        f"{cwl_path}",
+        "./.input.yml"
+    ])
 
 
-# main
 def check_if_file_exists(path) -> bool:
     exist = os.path.isfile(path)
     if exist:
@@ -239,12 +256,10 @@ def check_if_file_exists(path) -> bool:
     return exist
 
 
-# main
 def check_file_does_not_exists(path) -> bool:
     return not os.path.isfile(path)
 
 
-# main
 def check_file_is_not_empty(outdir, path) -> bool:
     file = os.path.join(outdir, path)
     if os.path.getsize(file) > 0:
@@ -252,12 +267,10 @@ def check_file_is_not_empty(outdir, path) -> bool:
     return False
 
 
-# main
 def compare_result_with_expected(result_path, expected_path) -> bool:
     return filecmp.cmp(result_path, expected_path)
 
 
-# main
 def check_files_in_out_dir(outdir: str, files: list) -> bool:
     # TODO does it check all list for sure?
 
@@ -266,19 +279,13 @@ def check_files_in_out_dir(outdir: str, files: list) -> bool:
         # assert check_file_is_not_empty == True # TODO debug
 
 
-# main
 def how_many_variants_in_vcf(outdir: str, filename: str):
     # TODO after setup py is completed lets do it by pysam
     # TODO implement gzipped files
-    with open(os.path.join(outdir, filename),"r") as file:
+    with open(os.path.join(outdir, filename), "r") as file:
         variants = 0
         for line in file:
             if not "#" in line[0]:
                 variants += 1
     print(colors.OKBLUE + f"{filename} contains {variants} variants.")
     return variants
-
-
-
-
-
