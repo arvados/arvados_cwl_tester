@@ -1,4 +1,4 @@
-from tools import *
+from biocwl_test.tools import *
 
 
 def test_load_file():

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "_version.py"
+
+[project]
+name = "biocwl_test"
+dependencies = [
+    "pytest==7.1.2",
+    "PyYAML==5.4.1",
+    "docker==5.0.3"
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+packages = ["biocwl_test"]
