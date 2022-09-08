@@ -22,5 +22,8 @@ def test_create_input_yml():
 
 
 def test_run_cwl(): # 
-    inputs = {"name": "example.txt"}
-    run_cwl("components/single_step/single_step.cwl", inputs)
+    run_cwl("components/single_step/single_step.cwl", {"name": "example.txt"})
+
+
+def test_basic_arvados_test():
+    assert basic_arvados_test("arind-j7d0g-1p06n3sacrzeqrt", "Test", "./examples/example_pipeline.cwl", {"name": "testing_name"}) == True
