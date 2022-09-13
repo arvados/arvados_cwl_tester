@@ -10,6 +10,8 @@ import signal
 import glob
 import subprocess
 
+from biocwltest.arvados_client import ArvadosClient
+
 """
 ███████████████████████████
 ███████▀▀▀░░░░░░░▀▀▀███████
@@ -71,7 +73,8 @@ def test_arvados_cwl_runner():
 
 def create_new_project(target):
     # Create project in target
-    project_uuid = ""
+    client = ArvadosClient()
+    project_uuid = client.create_project(target)['uuid']
     print(f"Project was created succesfully: {project_uuid}")
     return project_uuid
 
@@ -92,9 +95,10 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
     ])
     # do not make anything else until this function is completed
 
-def find_process_in_new_project(project_uuid):
 
-    return process
+def find_process_in_new_project(project_uuid):
+    client = ArvadosClient()
+    return client.get_process_by_parent_uuid(project_uuid)
 
 
 def check_if_process_is_completed(process):
@@ -123,4 +127,6 @@ Plan:
 
 pytest - niech uruchomi te testy parallelnie, po to żeby nie czekać i żeby na arvadosie już się liczyło
 
+Pomysły:
+- Mapowanie odpowiedzi z Arvadosa do klas pythona
 """
