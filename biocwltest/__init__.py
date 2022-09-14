@@ -98,11 +98,13 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
 
 def find_process_in_new_project(project_uuid):
     client = ArvadosClient()
-    return client.get_process_by_parent_uuid(project_uuid)
+    return client.get_container_request_by_parent_uuid(project_uuid)
 
 
 def check_if_process_is_completed(process):
-    return True
+    client = ArvadosClient()
+    container = client.get_container(process['container_uuid'])
+    return container["state"] in ["Complete", "Cancelled"]
 
 
 def basic_arvados_test(target_project, test_name, cwl_path, inputs_dictionary) -> dict:
@@ -129,4 +131,11 @@ pytest - niech uruchomi te testy parallelnie, po to żeby nie czekać i żeby na
 
 Pomysły:
 - Mapowanie odpowiedzi z Arvadosa do klas pythona
+- Dodanie funkcji to sprawdzania statusu procesu (failed, cancelled, completed):
+  pole `state` in container:
+  Queued: Queued
+  Cancelled: Cancelled
+  Completed: Completed, exit_code = 0 ((["container_requests.container.state","=","Complete"],["container_requests.container.exit_code","=","0"]))
+  Failed: Completed, exit_code != 0 (["container_requests.container.state","=","Complete"],["container_requests.container.exit_code","!=","0"])
+  Running: ["container_requests.container.state","=","Running"]
 """
