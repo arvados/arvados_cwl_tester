@@ -10,7 +10,6 @@ import signal
 import glob
 import subprocess
 
-from biocwltest.arvados_client import ArvadosClient
 
 """
 ███████████████████████████
@@ -50,6 +49,7 @@ def run(*args: Any, **kwargs: Any) -> None:
 # Ours code
 from biocwltest.helpers import *
 
+
 def run_cwl(cwl_path: str, inputs_dictionary):
     helpers.create_input_yml(inputs_dictionary)
     basedir = "/tmp"
@@ -69,15 +69,6 @@ def test_arvados_cwl_runner():
 
 
 # NEW PLANS
-
-
-def create_new_project(target):
-    # Create project in target
-    client = ArvadosClient()
-    project_uuid = client.create_project(target)['uuid']
-    print(f"Project was created succesfully: {project_uuid}")
-    return project_uuid
-
 
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
     print(colors.RUNNING + f"\n INFO: Running cwl workflow on arvados: {cwl_path}..., project_id: {project_id}")
