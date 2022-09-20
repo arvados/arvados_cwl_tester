@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
@@ -39,8 +40,28 @@ class Container(Base):
     state: str
 
 
+class ProcessStatus(enum.Enum):
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    RUNNING = "Running"
+    CANCELLED = "Cancelled"
+    QUEUED = "Queued"
+
+
 @dataclass
 class Process(Base):
+    def __post_init__(self):
+        if self.container.state == "Complete" and self.container.exit_code == 0:
+            self.status = ProcessStatus.COMPLETED
+        elif self.container.state == "Complete" and self.container.exit_code != 0:
+            self.status = ProcessStatus.FAILED
+        elif self.container.state == "Cancelled":
+            self.status = ProcessStatus.CANCELLED
+        elif self.container.state == "Queued":
+            self.status = ProcessStatus.QUEUED
+        elif self.container.state == "Running":
+            self.status = ProcessStatus.RUNNING
+
     uuid: str
     command: List[str]
     container_count: int
@@ -62,9 +83,21 @@ class Process(Base):
     state: str
     use_existing: bool
     container: Container
+    status: ProcessStatus = None
 
 
 @dataclass
 class Collection(Base):
-    # TODO
-    pass
+    uuid: str
+    name: str
+    owner_uuid: str
+    properties: Dict
+    modified_at: datetime
+    created_at: datetime
+    delete_at: datetime
+    trash_at: datetime
+    portable_data_hash: str
+    version: int
+    manifest_text: str
+    file_count: int
+    file_size_total: int

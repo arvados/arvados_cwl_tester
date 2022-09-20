@@ -1,5 +1,6 @@
-from biocwltest.helpers import *
-from biocwltest import *
+from biocwltest import helpers
+from biocwltest.basic_tests import basic_arvados_test
+from biocwltest.cwl_runner import run_cwl
 
 
 def test_load_file():

@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import arvados
 from arvados.errors import ApiError
 
-from biocwltest.arvados_connection.entities import Project, Container, Process
-from biocwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError
+from biocwltest.arvados_connection.entities import Project, Container, Process, Collection
+from biocwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, CollectionNotFoundError
 
 
 class ArvadosClient:
@@ -14,7 +14,7 @@ class ArvadosClient:
 
     def get_project(self, uuid: str) -> Project:
         """
-        Get dictionary with project data
+        Get project by uuid
         """
         try:
             response = self.api.groups().get(uuid=uuid).execute()
@@ -22,6 +22,18 @@ class ArvadosClient:
         except ApiError as e:
             if e.resp.status == 404:
                 raise ProjectNotFoundError(f"No project with uuid {uuid}")
+            raise
+
+    def get_collection(self, uuid: str) -> Collection:
+        """
+        Get collection by uuid
+        """
+        try:
+            response = self.api.collections().get(uuid=uuid).execute()
+            return Collection.from_dict(**response)
+        except ApiError as e:
+            if e.resp.status == 404:
+                raise CollectionNotFoundError(f"No collection with uuid {uuid}")
             raise
 
     def create_project(self, parent_uuid: str) -> Project:

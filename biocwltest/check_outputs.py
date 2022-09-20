@@ -1,4 +1,9 @@
 #!/usr/bin/python
+import filecmp
+import glob
+import os
+
+from biocwltest.helpers import colors
 
 
 def check_if_file_exists(path) -> bool:

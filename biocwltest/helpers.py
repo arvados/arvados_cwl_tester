@@ -27,10 +27,12 @@ def get_cwl_name_from_path(cwl_path):
 def pwd(path_to_file):
     return os.path.dirname(os.path.abspath(path_to_file))
 
+
 def create_input_yml(inputs_dictionary):
     data = yaml.dump(inputs_dictionary)
     with open("./.input.yml", "w") as yml:
         yml.write(data)
+
 
 def create_dict_for_input_file(name: str, resources) -> dict:
     return {
