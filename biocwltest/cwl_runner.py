@@ -60,17 +60,15 @@ def test_arvados_cwl_runner():
 
 
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
-    print(colors.RUNNING + f"\n INFO: Running cwl workflow on arvados: {cwl_path}..., project_id: {project_id}")
     create_input_yml(inputs_dictionary)
     user = os.popen("git config user.name").read()
-    subprocess.run([
+    run = subprocess.run([
         'arvados-cwl-runner',
         "--debug",
-        "--name",
-        f"Testing {os.path.basename(cwl_path)} {user}",
+        "--name", f"{test_name} {os.path.basename(cwl_path)} {user}",
         f"--project-uuid={project_id}",
         "--intermediate-output-ttl", "604800",
         f"{cwl_path}",
         "./.input.yml"
-    ])
-    # do not make anything else until this function is completed
+    ], check=True)
+

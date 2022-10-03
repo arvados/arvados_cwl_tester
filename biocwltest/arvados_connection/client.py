@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+import os
 
 import arvados
 from arvados.errors import ApiError
@@ -36,16 +37,18 @@ class ArvadosClient:
                 raise CollectionNotFoundError(f"No collection with uuid {uuid}")
             raise
 
-    def create_project(self, parent_uuid: str) -> Project:
+    def create_project(self, parent_uuid: str, test_name: str) -> Project:
         """
         Create test project in target project. Trash it after one week.
         :param parent_uuid: Target project uuid
         :return: dictionary with project data
         """
+        user = os.popen("git config user.name").read()
+
         response = self.api.groups().create(body={
             "group_class": "project",
             "owner_uuid": parent_uuid,
-            "name": f'Testing workflow {datetime.now():%Y-%m-%d %H:%M:%S%z}',
+            "name": f'Testing {test_name} {datetime.now():%Y-%m-%d %H:%M:%S%z} {user}',
             "trash_at": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         }).execute()
         return Project.from_dict(**response)

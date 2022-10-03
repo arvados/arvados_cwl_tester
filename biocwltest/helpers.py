@@ -13,6 +13,12 @@ class colors:
     BOLD = '\033[1m'
 
 
+def load_json(path) -> dict:
+    with open(path, 'r') as f:
+        data = json.load(f)
+    return data
+
+
 def load_file(path: str) -> list:
     with open(path, "r") as file:
         lines = file.readlines()
