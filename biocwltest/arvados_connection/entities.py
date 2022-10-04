@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
 
+import arvados
+from arvados import CollectionReader
+
 
 @dataclass
 class Base:
@@ -88,6 +91,9 @@ class Process(Base):
 
 @dataclass
 class Collection(Base):
+    def __post_init__(self):
+        self.reader = arvados.CollectionReader(self.manifest_text)
+
     uuid: str
     name: str
     owner_uuid: str
@@ -101,3 +107,7 @@ class Collection(Base):
     manifest_text: str
     file_count: int
     file_size_total: int
+    reader: CollectionReader = None
+    #  Arvados collection object, example of getting all files with sizes:
+    #  for f in collection.reader.all_files():
+    #     print(f.name(), f.size())
