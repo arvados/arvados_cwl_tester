@@ -14,4 +14,4 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["biocwl_test"]
+packages = ["biocwltest"]
