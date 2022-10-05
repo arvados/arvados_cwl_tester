@@ -56,7 +56,7 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
     run = subprocess.run([
         'arvados-cwl-runner',
         "--debug",
-        "--name", f"{test_name} {os.path.basename(cwl_path)} {user}",
+        "--name", f"{test_name}",
         f"--project-uuid={project_id}",
         "--intermediate-output-ttl", "604800",
         f"{cwl_path}",

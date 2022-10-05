@@ -5,6 +5,9 @@ from biocwltest.helpers import Colors, load_json
 import os
 
 
+
+
+
 def create_new_project(target: str, test_name: str):
     # Create project in target
     client = ArvadosClient()
@@ -49,10 +52,15 @@ def check_if_collection_output_not_empty(process: Process):
 
 FILES = None
 VARIABLES = None
+DIRECTORIES = None
+UUIDS = None
 
 if os.path.isfile("./test/variables.json"):
     VARIABLES = load_json("./test/variables.json")
+    
     FILES = VARIABLES["resources"]["files"]
+    UUIDS = VARIABLES["testing_projects"]
+    DIRECTORIES = VARIABLES["resources"]["directories"]
 
 
 def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
