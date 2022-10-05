@@ -1,14 +1,12 @@
 from biocwltest import helpers
-from biocwltest.basic import basic_arvados_test
 from biocwltest.cwl_runner import run_cwl, run_cwl_arvados
-from biocwltest.arvados_connection import find_process_in_new_project
-
+from biocwltest.arvados_connection import find_process_in_new_project, create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
 biocwltest_testing_uuid = "arind-j7d0g-u7rja16z572ldb8"
 
 
 def test_load_file():
-    assert type(helpers.load_file("./examples/example_pipeline.cwl")) == list
+    assert type(helpers.load_file("./components/single_step/single_step.cwl")) == list
 
 
 def test_create_input_yml():
@@ -25,22 +23,13 @@ def test_create_input_yml():
         }
     )
 
-# def test_create_input_yml_empty():
-#     helpers.create_input_yml()
+
+def test_create_input_yml_empty():
+    helpers.create_input_yml({})
 
 
-def test_run_cwl(): # 
-    run_cwl("components/single_step/single_step.cwl", {"name": "example.txt"})
-
-
-
-def test_run_cwl_arvados():
-    run_cwl_arvados(
-        "./components/single_step/single_step.cwl",
-        {"name": "example.txt"},
-        "arind-j7d0g-u7rja16z572ldb8",
-        "Name"
-        )
+def test_run_cwl():
+    run_cwl("./components/single_step/single_step.cwl", {"name": "example.txt"})
 
 
 def test_find_process_in_new_project():
@@ -49,16 +38,6 @@ def test_find_process_in_new_project():
 
 
 # Example how to run this tests on some pipeline
-def test_basic_arvados_test():
-    assert basic_arvados_test(
-        biocwltest_testing_uuid,
-        "Example test",
-        "components/single_step/single_step.cwl",
-        {
-            "name": "example.txt"
-            }
-        ) == []
-    
 def test_single_step():
     run = basic_arvados_test(
         biocwltest_testing_uuid,
@@ -68,5 +47,15 @@ def test_single_step():
             "name": "example.txt"
             }
             )
+    assert check_if_collection_output_not_empty(run)
+    assert create_ouputs_dict(run) == {
+        'example.txt': {
+            'size': 0,
+            'basename': 'example.txt',
+            'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt'
+            }
+            }
+    assert 'example.txt' in create_ouputs_dict(run)
+    
     
     

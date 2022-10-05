@@ -2,8 +2,9 @@
 
 import yaml
 import os
+import json
 
-class colors:
+class Colors:
     TESTING_INFO = '\033[95m'
     OKBLUE = '\033[94m'
     RUNNING = '\033[96m'
@@ -34,8 +35,10 @@ def pwd(path_to_file):
     return os.path.dirname(os.path.abspath(path_to_file))
 
 
-def create_input_yml(inputs_dictionary):
+def create_input_yml(inputs_dictionary={}):
     data = yaml.dump(inputs_dictionary)
+    if inputs_dictionary == {}:
+       data = "" 
     with open("./.input.yml", "w") as yml:
         yml.write(data)
 

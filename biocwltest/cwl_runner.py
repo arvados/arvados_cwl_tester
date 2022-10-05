@@ -3,7 +3,7 @@ import signal
 import subprocess
 from typing import Any
 
-from biocwltest.helpers import create_input_yml, colors
+from biocwltest.helpers import create_input_yml, Colors
 
 """
 ███████████████████████████
@@ -48,15 +48,6 @@ def run_cwl(cwl_path: str, inputs_dictionary):
     args = "--leave-tmpdir --debug --custom-net host --js-console --move-outputs --on-error stop".split(" ")
     args.extend(["--basedir", basedir, cwl_path, "./.input.yml"])
     run(args)
-
-
-def test_arvados_cwl_runner():
-    import arvados
-    import json
-    api = arvados.api()
-    x = json.dumps(api.container_requests().list().execute(), indent=4)
-    with open("sample.json", "w") as outfile:
-        outfile.write(x)
 
 
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
