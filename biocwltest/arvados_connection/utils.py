@@ -21,6 +21,14 @@ def find_process_in_new_project(project_uuid: str):
     return client.get_container_request_by_parent_uuid(project_uuid)
 
 
+def save_file(collection_uuid: str, filename: str, output_filename: str = None):
+    client = ArvadosClient()
+    collection = client.get_collection(collection_uuid)
+    with collection.reader.open(filename, 'r') as file_reader:
+        with open(output_filename or filename, 'w') as file:
+            file.write(file_reader.read())
+
+
 def check_if_process_is_finished(process: Process):
     if process.status in [
         ProcessStatus.COMPLETED,
@@ -38,7 +46,9 @@ def check_if_project_is_completed(process: Process):
     if process.status == ProcessStatus.COMPLETED:
         print(Colors.OKGREEN + "Process was completed successfully :-) !")
         return True
-    print(Colors.ERROR + "Process failed or cancelled :(")
+    log_name = f"{process.uuid}_stderr.txt"
+    print(Colors.ERROR + f"Process failed or cancelled :(, saving logs to {log_name}")
+    save_file(process.log_uuid, 'stderr.txt', log_name)
     return False
 
 
