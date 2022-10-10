@@ -2,6 +2,7 @@ import os
 import signal
 import subprocess
 from typing import Any
+from biocwltest.helpers import Colors
 
 from biocwltest.helpers import create_input_yml, Colors
 
@@ -53,7 +54,7 @@ def run_cwl(cwl_path: str, inputs_dictionary):
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
     create_input_yml(inputs_dictionary)
     user = os.popen("git config user.name").read()
-    run = subprocess.run([
+    run_cwl = subprocess.run([
         'arvados-cwl-runner',
         "--debug",
         "--name", f"{test_name}",
@@ -62,4 +63,5 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
         f"{cwl_path}",
         "./.input.yml"
     ], check=True)
+    print(run_cwl.stderr)
 
