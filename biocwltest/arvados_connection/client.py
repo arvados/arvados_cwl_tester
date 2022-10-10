@@ -49,7 +49,7 @@ class ArvadosClient:
         response = self.api.groups().create(body={
             "group_class": "project",
             "owner_uuid": parent_uuid,
-            "name": f'Testing {test_name} {datetime.now():%Y-%m-%d %H:%M:%S%z} {user}',
+            "name": f'{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%z} {user}',
             "trash_at": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         }).execute()
         return Project.from_dict(**response)

@@ -29,6 +29,8 @@ def check_if_process_is_finished(process: Process):
     ]:
         print(Colors.OKBLUE + "Process is finished!")
         return True
+    
+    print(process.log_uuid.stderr)
     return False
 
 
@@ -74,7 +76,6 @@ def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs
 
     assert check_if_process_is_finished(process)
     assert check_if_project_is_completed(process)
-    assert check_if_collection_output_not_empty(process)
     return process
 
 
