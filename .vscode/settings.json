@@ -1,0 +1,7 @@
+{
+  "pythonTestExplorer.testFramework": "pytest",
+  "pythonTestExplorer.testplanArgs": [
+    "-s",
+    "-vv"
+  ]
+}

@@ -8,53 +8,145 @@
 
 == Introduction
 
-This is library prepared for running/testing cwl scripts using pytest, both locally and on arvados. This is beta version, in progress
+This is python library prepared for running/testing cwl pipelines on Arvados platform.
 
 == Installation
 
-To install the latest version:
+You need to install Arvados Cwl Test via  'pip install', according to this instructions: 
 
 [source, bash]
 ----
 pip install biocwl-test --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
 ----
 
-where `<your_personal_token>` is token with `read_api` scope that can be created in Preferences -> Access Tokens.
+where `<your_personal_token>` is token with `read_api` scope that can be created on the GitLab in Preferences -> Access Tokens.
 
-== Development of the library
 
-Main script, containing all functions is `tools.py`
+To install specific version use  `biocwl-test==<version>`. Example: `biocwl-test==0.2.dev16+g3858809`
 
-Test library during development using pytest configuration in code editor (Example: Pycharm, VScode) or command line:
+After installation of the tool install other needed packages:
+
+[source, bash]
+----
+bash install.sh
+----
+
+== Usage
+
+Arvados Cwl Test is implemented as Python library and can be executed using pytest (https://docs.pytest.org/en/7.1.x/)
+
+=== In python code
+
+Example of usage::
+[source, python]
+----
+from biocwltest.arvados_connection import utils
+
+
+def test_single_step():
+    run = basic_arvados_test(
+        biocwltest_testing_uuid,
+        "Example test",
+        "components/single_step/single_step.cwl",
+        {
+            "name": "example.txt"
+            }
+            )
+    assert check_if_collection_output_not_empty(run)
+    assert create_ouputs_dict(run) == {
+        'example.txt': {
+            'size': 0,
+            'basename': 'example.txt',
+            'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt'
+            }
+            }
+    assert 'example.txt' in create_ouputs_dict(run)
+----
+
+You can store input dictionaries, which usually are stored in `input.yml` using 'variables.json' placed in './test/variables.json`
+
+For example::
+[source, json]
+----
+{
+  "testing_projects": {
+    "ardev": "ardev-j7d0g-ucckjtjhhp7xq81",
+    "arind": "arind-j7d0g-ky58se83cx2wh39",
+    "arkau": "arkau-j7d0g-9cs24q86tesl6rm"
+  },
+  "resources": {
+    "directories": {
+      "two_1000000_inforR_fastq": {
+        "class": "Directory",
+        "path": "keep:271cbc530a4fe42173a72d53531ad849+225"
+      }
+    },
+    "files": {
+      "reference_genome": {
+        "class": "File",
+        "path": "keep:570c54e5cc295045cfe9f5b361d63e36+6185/Homo_sapiens_assembly38.fasta",
+        "secondaryFiles": [
+          {
+            "class": "File",
+            "path": "keep:570c54e5cc295045cfe9f5b361d63e36+6185/Homo_sapiens_assembly38.fasta.fai"
+          }
+        ]
+      },
+      "intervals": {
+        "class": "File",
+        "path": "keep:11a2a794048a689efb7ecb1e1e66d1e8+12334/wgs_calling_regions.hg38.bed"
+      }
+    }
+  }
+}
+----
+
+Use `FILES', 'DIRECTORIES` and `UUIDS` in python script importing them as:
+
+[soource, python]
+----
+from biocwltest.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
+
+DIRECTORIES["two_1000000_inforR_fastq"]
+UUIDS["akau"]
+FILES["intervals"]
+
+----
+
+=== Execute Tests from Commanline
 
 [source, bash]
 ----
 pytest -s
-
 ----
 
-Write additional tests in `test_tools.py`.
-
-There are additional directories: `docker` and `components` and file `example_pipeline.cwl` needed for testing library on some example cwl. Feel free to change the files to test new features. 
-
-==  Usage
-
-In beta version of library you need to copy `tools.py` to your repository. 
-Later create testing file, based on example: `test_example_usage.py` and you can use all functions from `tools.py` marked with comment `# main`.
-
-You can create testing functions for each cwl you want (workflows, commandlinetools, expressiontools) and run using VScode interface, or commandline:
+To run single test define `-k keyword` to choose some subset of tests
 
 [source, bash]
 ----
-
-# Run all tests in test_example_usage.py
-pytest test/test_example_usage.py -s 
-
-# Run single test
-pytest test/test_example_usage.py -s -k {some_keyword_in_fuction_name}
-
-#Example:
-pytest test/test_example_usage.py -s -k VarCal_apply
+pytest -k my_lovely_test
 ----
 
-TIP: Use `cwltool --make-template {cwl_path}` to find out how to construct inputs. 
+To run all tests from specific file run:
+
+[source, bash]
+----
+pytest test/test_main.py -s
+----
+
+To run more tests in parallel: 
+
+[source, bash]
+----
+pytest -n 3
+----
+
+And more options you can find in pytest library documentation.
+
+== Development of the library
+
+. Fork or pull and create branch
+. Write the code
+- write unit tests for your functions
+- build package (every commit builds package on Gitlab)
+- merge request
