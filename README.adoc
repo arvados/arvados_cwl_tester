@@ -147,11 +147,12 @@ And more options you can find in pytest library documentation.
 
 [source, bash]
 ----
-arvados_synchronize_test_data
+arvados_synchronize_test_data ardev-j7d0g-k6hdltddhuq54kx arind-j7d0g-k0mddryyxb2q0tq
 ----
-
+    positional arguments:
+      project_uuids  List project uuids where test data is stored
     options:
-      --dry-run     Run a script without updating Arvados projects
+      --dry-run      Run a script without updating Arvados projects
 
 
 == Development of the library

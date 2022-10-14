@@ -3,32 +3,15 @@ import os
 
 import arvados
 
-PROJECTS = {
-    'ardev': "ardev-j7d0g-k6hdltddhuq54kx",
-    'arind': "arind-j7d0g-k0mddryyxb2q0tq"
-}
 
-
-def create_config_files():
-    config_path = "~/.config/arvados"
-    api_token = os.environ.get('ARVADOS_API_TOKEN')
-    if not api_token:
-        print("ARVADOS_API_TOKEN is not set")
-        exit(1)
-
-    for instance in PROJECTS.keys():
-        with open(os.path.join(config_path, f"{instance}.conf"), "w") as file:
-            file.write(f"ARVADOS_API_HOST=api.{instance}.roche.com\nARVADOS_API_TOKEN={api_token}")
-
-
-def get_collections():
+def get_collections(projects):
     items = {}
 
-    for instance, uuid in PROJECTS.items():
+    for instance, uuid in projects.items():
         api = arvados.api('v1', host=f'api.{instance}.roche.com', token=os.environ['ARVADOS_API_TOKEN'])
         collections = arvados.util.keyset_list_all(api.collections().list, filters=[['owner_uuid', '=', uuid]])
         for collection in collections:
-            values = items.setdefault(collection['name'], {i: None for i in PROJECTS.keys()})
+            values = items.setdefault(collection['name'], {i: None for i in projects.keys()})
             values[instance] = {
                 'uuid': collection['uuid'],
                 'pdh': collection['portable_data_hash'],
@@ -37,7 +20,7 @@ def get_collections():
     return items
 
 
-def copy_files(src_uuid, src_instance, dst_instance, dst_uuid=None):
+def copy_files(projects, src_uuid, src_instance, dst_instance, dst_uuid=None):
     src_api = arvados.api('v1', host=f'api.{src_instance}.roche.com', token=os.environ['ARVADOS_API_TOKEN'])
     dst_api = arvados.api('v1', host=f'api.{dst_instance}.roche.com', token=os.environ['ARVADOS_API_TOKEN'])
     src_col = arvados.collection.CollectionReader(src_uuid, api_client=src_api)
@@ -52,10 +35,10 @@ def copy_files(src_uuid, src_instance, dst_instance, dst_uuid=None):
         dst_col.save()
     else:
         c = src_api.collections().get(uuid=src_col.manifest_locator()).execute()
-        dst_col.save_new(name=c['name'], owner_uuid=PROJECTS[dst_instance])
+        dst_col.save_new(name=c['name'], owner_uuid=projects[dst_instance])
 
 
-def update_projects(collections, dry_run=True):
+def update_projects(projects, collections, dry_run=True):
     for collection_name, instances in collections.items():
         last_modified = sorted([i for i in instances.values() if i], key=lambda x: x.get('modified_at'), reverse=True)[0]
         last_modified_instance = last_modified['uuid'].split('-')[0]
@@ -67,6 +50,7 @@ def update_projects(collections, dry_run=True):
                 print(f"\tUpdating collection {item['uuid']} on {instance}")
                 if not dry_run:
                     copy_files(
+                        projects,
                         src_uuid=last_modified['uuid'],
                         src_instance=last_modified_instance,
                         dst_uuid=item['uuid'],
@@ -76,6 +60,7 @@ def update_projects(collections, dry_run=True):
                 print(f"\tNot found {collection_name} on {instance}, creating")
                 if not dry_run:
                     copy_files(
+                        projects,
                         src_uuid=last_modified['uuid'],
                         src_instance=last_modified_instance,
                         dst_instance=instance
@@ -84,7 +69,10 @@ def update_projects(collections, dry_run=True):
 
 def synchronize():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+    parser.add_argument('--dry-run', dest='dry_run', action='store_true', help="Run a script without updating Arvados projects")
+    parser.add_argument('project_uuids', nargs='*', help="List project uuids where test data is stored")
     args = parser.parse_args()
-    collections = get_collections()
-    update_projects(collections, dry_run=args.dry_run)
+    projects = {uuid.split('-')[0]: uuid for uuid in args.project_uuids}
+    collections = get_collections(projects)
+    update_projects(projects, collections, dry_run=args.dry_run)
+
