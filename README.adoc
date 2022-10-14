@@ -143,6 +143,17 @@ pytest -n 3
 
 And more options you can find in pytest library documentation.
 
+=== Synchronize test data across Arvados instances
+
+[source, bash]
+----
+arvados_synchronize_test_data
+----
+
+    options:
+      --dry-run     Run a script without updating Arvados projects
+
+
 == Development of the library
 
 . Fork or pull and create branch
