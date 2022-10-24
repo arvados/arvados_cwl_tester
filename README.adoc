@@ -12,7 +12,31 @@ This is python library prepared for running/testing cwl pipelines on Arvados pla
 
 == Installation
 
-You need to install Arvados Cwl Test via  'pip install', according to this instructions: 
+=== Set up conda environment
+
+[source, bash]
+----
+wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
+sh Miniconda3-py38_4.12.0-Linux-x86_64.sh
+conda install --no-deps pip
+pip install virtualenv
+----
+
+=== Create virtualenv in project directory
+
+[source, bash]
+----
+virtualenv venv
+----
+
+=== Activate virtualenv
+
+[source, bash]
+----
+source venv/bin/activate
+----
+
+=== You need to install Arvados Cwl Test via  'pip install', according to this instructions:
 
 [source, bash]
 ----
@@ -24,11 +48,12 @@ where `<your_personal_token>` is token with `read_api` scope that can be created
 
 To install specific version use  `biocwl-test==<version>`. Example: `biocwl-test==0.2.dev16+g3858809`
 
-After installation of the tool install other needed packages:
-
+In case of `ImportError: pycurl: libcurl link-time ssl backend (nss) is different from compile-time ssl backend (none/other)` error
+fix it with:
 [source, bash]
 ----
-bash install.sh
+pip uninstall pycurl
+pip install --compile  --no-cache-dir --install-option="--with-nss" pycurl==7.44
 ----
 
 == Usage
