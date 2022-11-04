@@ -4,7 +4,7 @@
 :sectnums:
 :appversion: v1.0
 
-= BioCWL test
+= Arvados CWLtest
 
 == Introduction
 
@@ -35,7 +35,7 @@ bash install.sh
 
 Arvados Cwl Test is implemented as Python library and can be executed using pytest (https://docs.pytest.org/en/7.1.x/)
 
-=== In python code
+=== How to create tests from Python API
 
 Example of usage::
 [source, python]
@@ -44,7 +44,9 @@ from biocwltest.arvados_connection import utils
 
 
 def test_single_step():
-    run = basic_arvados_test(
+
+# run the test and define in variable test_run to use it later
+    test_run = basic_arvados_test(
         biocwltest_testing_uuid,
         "Example test",
         "components/single_step/single_step.cwl",
@@ -52,18 +54,28 @@ def test_single_step():
             "name": "example.txt"
             }
             )
-    assert check_if_collection_output_not_empty(run)
-    assert create_ouputs_dict(run) == {
+
+# Chek if output collection is not empty - for example in cases when File[] or Directory[] is the output
+    assert check_if_collection_output_not_empty(test_run)
+
+# There is a repsresentation how output dictionary looks like
+    assert create_ouputs_dict(test_run) == {
         'example.txt': {
             'size': 0,
             'basename': 'example.txt',
             'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt'
             }
             }
-    assert 'example.txt' in create_ouputs_dict(run)
-----
+# Check if there is a specific file in outputs
+    assert 'example.txt' in create_ouputs_dict(test_run)
 
-You can store input dictionaries, which usually are stored in `input.yml` using 'variables.json' placed in './test/variables.json`
+# Be sure if output has some specific size you expect
+    assert create_ouputs_dict(test_run)['example.txt]["size"] > 0
+
+----
+=== Variables used in multiple tests
+
+Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `variables.json`
 
 For example::
 [source, json]
