@@ -6,7 +6,7 @@ biocwltest_testing_uuid = "arind-j7d0g-u7rja16z572ldb8"
 
 
 def test_load_file():
-    assert type(helpers.load_file("./components/single_step/single_step.cwl")) == list
+    assert type(helpers.load_file("./components/test_single_step/test_single_step.cwl")) == list
 
 
 def test_create_input_yml():
@@ -29,7 +29,7 @@ def test_create_input_yml_empty():
 
 
 def test_run_cwl():
-    run_cwl("./components/single_step/single_step.cwl", {"name": "example.txt"})
+    run_cwl("./components/test_single_step/test_single_step.cwl", {"name": "example.txt"})
 
 
 def test_find_process_in_new_project():
@@ -38,11 +38,11 @@ def test_find_process_in_new_project():
 
 
 # Example how to run this tests on some pipeline
-def test_single_step():
+def test_test_single_step():
     run = basic_arvados_test(
         biocwltest_testing_uuid,
         "Example test",
-        "components/single_step/single_step.cwl",
+        "components/test_single_step/test_single_step.cwl",
         {
             "name": "example.txt"
             }
