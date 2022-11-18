@@ -43,11 +43,11 @@ Example of usage::
 from biocwltest.arvados_connection import utils
 
 
-def test_single_step():
+def test_test_single_step():
     run = basic_arvados_test(
         biocwltest_testing_uuid,
         "Example test",
-        "components/single_step/single_step.cwl",
+        "cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": "example.txt"
             }
