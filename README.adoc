@@ -143,30 +143,6 @@ pytest -n 3
 
 And more options you can find in pytest library documentation.
 
-=== Synchronize test data across Arvados instances
-
-[source, bash]
-----
-arvados_synchronize_test_data ardev-j7d0g-k6hdltddhuq54kx arind-j7d0g-k0mddryyxb2q0tq
-----
-    positional arguments:
-      project_uuids  List project uuids where test data is stored
-    options:
-      --dry-run      Run a script without updating Arvados projects
-
-
-For pRED CWL Developers. Our current testing data spaces are:
-
-- ARKAU: arkau-j7d0g-oceeb0knhgw6whs
-- ARIND: arind-j7d0g-x6u6pr4tfz5xui2
-- ARDEV: ardev-j7d0g-at95jftjy7kv8ev
-
-To synchronize all our testing data spaces use command:
-
-[source, bash]
-----
-arvados_synchronize_test_data arkau-j7d0g-oceeb0knhgw6whs arind-j7d0g-x6u6pr4tfz5xui2 ardev-j7d0g-at95jftjy7kv8ev
-----
 == Development of the library
 
 . Fork or pull and create branch
