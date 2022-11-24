@@ -17,3 +17,6 @@ dynamic = ["version"]
 
 [tool.setuptools]
 packages = ["biocwltest"]
+
+[project.scripts]
+arvados_synchronize_test_data = "biocwltest.synchronize_test_data:synchronize"

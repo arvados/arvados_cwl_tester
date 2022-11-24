@@ -4,11 +4,24 @@
 :sectnums:
 :appversion: v1.0
 
-= BioCWL test
+= Arvados CWLtest
 
 == Introduction
 
-This is python library prepared for running/testing cwl pipelines on Arvados platform.
+Common Workflow Language (CWL) is open and free workflow management system - mainly for computational biology. CWL is a main method to run workflows on Arvados platform. Arvados CWLtest library is dedicated to people, that develop pipelines in CWL and run them on Arvados. This library allows to create easy and reproducible tests for CWL scripts, which you can keep in your repository inside python script and run them using some python pytest testing package. Usage of this library requires some basic Python knowledge, but don't be affraid - is super easy. Lets get started.
+
+Library contains some set of functions, that allows to run a process on Arvados and later get information about outputs and check if the files are as you expect. If you run the test from commandline following things happen:
+
+1. Empty project is created on arvados 
+2. `arvados-cwl-runner` creates a process that runs your CWL scripts inside this project
+3. You can see the logs for the process
+4. If workflow status is `completed` pytest pass. If workflow status is `failed` or `cancelled` your test will fail.
+5. Optionally there are executed other tests on outputs from the run (you can see examples in later chapters)
+6. After one week project including all processes will be removed from arvados. 
+
+To know how to create tests via Python API check <<How to create tests from Python API>>.
+
+Library contains some additional feature - arvados_synchronize_test_data. It is dedicated to teams that would like to perform tests on different arvados nodes (for example arkau, ardev, arind and other). For CWL pipelines you need to testing data. This functionality allows to sychronize testing data between arvados nodes. Instructions how to use this feature is described in <<Synchronize test data across Arvados instances>>.
 
 == Installation
 
@@ -60,16 +73,19 @@ pip install --compile  --no-cache-dir --install-option="--with-nss" pycurl==7.44
 
 Arvados Cwl Test is implemented as Python library and can be executed using pytest (https://docs.pytest.org/en/7.1.x/)
 
-=== In python code
+=== How to create tests from Python API
 
 Example of usage::
+
 [source, python]
 ----
 from biocwltest.arvados_connection import utils
 
 
 def test_single_step():
-    run = basic_arvados_test(
+
+# run the test and define in variable test_run to use it later
+    test_run = basic_arvados_test(
         biocwltest_testing_uuid,
         "Example test",
         "components/single_step/single_step.cwl",
@@ -77,18 +93,28 @@ def test_single_step():
             "name": "example.txt"
             }
             )
-    assert check_if_collection_output_not_empty(run)
-    assert create_ouputs_dict(run) == {
+
+# Chek if output collection is not empty - for example in cases when File[] or Directory[] is the output
+    assert check_if_collection_output_not_empty(test_run)
+
+# There is a repsresentation how output dictionary looks like
+    assert create_ouputs_dict(test_run) == {
         'example.txt': {
             'size': 0,
             'basename': 'example.txt',
             'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt'
             }
             }
-    assert 'example.txt' in create_ouputs_dict(run)
-----
+# Check if there is a specific file in outputs
+    assert 'example.txt' in create_ouputs_dict(test_run)
 
-You can store input dictionaries, which usually are stored in `input.yml` using 'variables.json' placed in './test/variables.json`
+# Be sure if output has some specific size you expect
+    assert create_ouputs_dict(test_run)['example.txt]["size"] > 0
+
+----
+=== Variables used in multiple tests
+
+Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `variables.json`
 
 For example::
 [source, json]
@@ -126,7 +152,7 @@ For example::
 }
 ----
 
-Use `FILES', 'DIRECTORIES` and `UUIDS` in python script importing them as:
+Use `FILES', 'DIRECTORIES` and `UUIDS` in python script importing them as::
 
 [soource, python]
 ----
@@ -167,6 +193,18 @@ pytest -n 3
 ----
 
 And more options you can find in pytest library documentation.
+
+=== Synchronize test data across Arvados instances
+
+[source, bash]
+----
+arvados_synchronize_test_data ardev-j7d0g-k6hdltddhuq54kx arind-j7d0g-k0mddryyxb2q0tq
+----
+    positional arguments:
+      project_uuids  List project uuids where test data is stored
+    options:
+      --dry-run      Run a script without updating Arvados projects
+
 
 == Development of the library
 
