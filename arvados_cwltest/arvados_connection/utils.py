@@ -1,11 +1,8 @@
-from biocwltest.arvados_connection.client import ArvadosClient
-from biocwltest.arvados_connection.entities import Process, ProcessStatus
-from biocwltest.cwl_runner import run_cwl_arvados
-from biocwltest.helpers import Colors, load_json
+from arvados_cwltest.arvados_connection.client import ArvadosClient
+from arvados_cwltest.arvados_connection.entities import Process, ProcessStatus
+from arvados_cwltest.cwl_runner import run_cwl_arvados
+from arvados_cwltest.helpers import Colors, load_json
 import os
-
-
-
 
 
 def create_new_project(target: str, test_name: str):

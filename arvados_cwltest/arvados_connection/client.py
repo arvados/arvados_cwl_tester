@@ -5,8 +5,8 @@ import os
 import arvados
 from arvados.errors import ApiError
 
-from biocwltest.arvados_connection.entities import Project, Container, Process, Collection
-from biocwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
+from arvados_cwltest.arvados_connection.entities import Project, Container, Process, Collection
+from arvados_cwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
     CollectionNotFoundError
 
 
