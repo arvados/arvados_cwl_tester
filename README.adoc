@@ -86,16 +86,16 @@ Arvados Cwl Test is implemented as Python library and can be executed using pyte
 
 Example of usage::
 
-[source python]
+[source, python]
 ----
-from biocwltest.arvados_connection import utils
+from arvados_cwltest.arvados_connection import utils
 
 
 def test_single_step():
 
 # run the test and define in variable test_run to use it later
     test_run = basic_arvados_test(
-        biocwltest_testing_uuid,
+        testing_uuid,
         "Example test",
         "components/single_step/single_step.cwl",
         {
@@ -166,7 +166,7 @@ Use `FILES', 'DIRECTORIES` and `UUIDS` in python script importing them as::
 
 [source, python]
 ----
-from biocwltest.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
+from arvados_cwltest.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
 
 DIRECTORIES["two_1000000_inforR_fastq"]
 UUIDS["akau"]
