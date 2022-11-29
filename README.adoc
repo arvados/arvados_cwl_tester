@@ -165,7 +165,7 @@ def test_single_step():
 
 === How to use Input Variables
 
-Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `variables.json`
+Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `./test/variables.json`
 
 For example::
 [source, json]
