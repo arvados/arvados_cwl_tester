@@ -52,6 +52,13 @@ def check_if_project_is_completed(process: Process):
 
 
 def check_if_collection_output_not_empty(process: Process):
+    """
+    Checks if output collection in provided process is not an empty collection
+    Arguments:
+        process: class Process
+    Returns:
+        boolean - True if collection contains some files, false if is empty
+    """
     client = ArvadosClient()
     output = client.get_collection(process.output_uuid)
     if output.file_count > 0:
@@ -76,8 +83,17 @@ if os.path.isfile("./test/variables.json"):
 
 def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
     """
-    Run process, return process object. Check if project is finished, check if project is completed, check if outputs collection is not empty.
+    Run process, return process object (class Process)
+    Check if project is finished, check if project is completed.
+    Arguments:
+        target_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
+        test_name: str, name of the test
+        cwl_path: str, path to cwl file that will be executed
+        inputs_dictionary: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
+    Returns:
+        class Process
     """
+    
     new_created_project = create_new_project(target_project, test_name)
     run_cwl_arvados(cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name)
 
@@ -89,6 +105,13 @@ def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs
 
 
 def create_ouputs_dict(process: Process) -> dict:
+    """
+    Create dictionary with outputs from process
+    Arguments:
+        process: class Process
+    Returns:
+        Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location'' 
+    """
     client = ArvadosClient()
     collection = client.get_collection(process.output_uuid)
     data_hash = collection.portable_data_hash
