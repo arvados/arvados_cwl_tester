@@ -21,8 +21,10 @@ def find_process_in_new_project(project_uuid: str):
 def save_file(collection_uuid: str, filename: str, output_filename: str = None):
     client = ArvadosClient()
     collection = client.get_collection(collection_uuid)
+    if not os.path.exists("./logs"):
+        os.makedirs("./logs")
     with collection.reader.open(filename, 'r') as file_reader:
-        with open(output_filename or filename, 'w') as file:
+        with open(f"./logs/{output_filename}" or f"./logs/{filename}", 'w') as file:
             file.write(file_reader.read())
 
 
