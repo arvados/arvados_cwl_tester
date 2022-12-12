@@ -4,6 +4,7 @@ from arvados_cwltest.cwl_runner import run_cwl_arvados
 from arvados_cwltest.helpers import Colors, load_json
 import os
 
+# TODO consider to move testing functions form utils to init, to not require from user complicated import: arvados_cwltest.arvados_connection.utils.nazwa
 
 def create_new_project(target: str, test_name: str):
     # Create project in target
@@ -93,7 +94,7 @@ def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs
     Returns:
         class Process
     """
-    
+
     new_created_project = create_new_project(target_project, test_name)
     run_cwl_arvados(cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name)
 
