@@ -42,13 +42,13 @@ You need to install Arvados-cwltest via  'pip install', according to this instru
 
 [source, bash]
 ----
-pip install biocwl-test --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
+pip install arvados-cwltest --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
 ----
 
 where `<your_personal_token>` is token with `read_api` scope that can be created on the GitLab in Preferences -> Access Tokens.
 
 
-To install specific version use  `biocwl-test==<version>`. Example: `biocwl-test==0.2.dev16+g3858809`
+To install specific version use  `arvados-cwltest==<version>`. Example: `arvados-cwltest==0.2.dev16+g3858809`
 
 In case of `ImportError: pycurl: libcurl link-time ssl backend (nss) is different from compile-time ssl backend (none/other)` error
 fix it with:

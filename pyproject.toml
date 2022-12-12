@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 write_to = "_version.py"
 
 [project]
-name = "biocwl_test"
+name = "arvados_cwltest"
 dependencies = [
     "pytest==7.1.2",
     "PyYAML==5.4.1",
