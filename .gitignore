@@ -154,3 +154,6 @@ fabric.properties
 *input.yml
 sample.json
 example.txt
+
+# arvados_cwltest
+logs

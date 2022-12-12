@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 write_to = "_version.py"
 
 [project]
-name = "biocwl_test"
+name = "arvados_cwltest"
 dependencies = [
     "pytest==7.1.2",
     "PyYAML==5.4.1",
@@ -16,7 +16,4 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["biocwltest"]
-
-[project.scripts]
-arvados_synchronize_test_data = "biocwltest.synchronize_test_data:synchronize"
+packages = ["arvados_cwltest"]

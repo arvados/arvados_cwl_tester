@@ -1,12 +1,11 @@
-from biocwltest import helpers
-from biocwltest.cwl_runner import run_cwl, run_cwl_arvados
-from biocwltest.arvados_connection import find_process_in_new_project, create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
+from arvados_cwltest import helpers
+from arvados_cwltest.arvados_connection import find_process_in_new_project, create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
-biocwltest_testing_uuid = "arind-j7d0g-u7rja16z572ldb8"
+uuid = "arind-j7d0g-u7rja16z572ldb8"
 
 
 def test_load_file():
-    assert type(helpers.load_file("./components/single_step/single_step.cwl")) == list
+    assert type(helpers.load_file("./cwl_workflows/test_single_step/test_single_step.cwl")) == list
 
 
 def test_create_input_yml():
@@ -28,21 +27,17 @@ def test_create_input_yml_empty():
     helpers.create_input_yml({})
 
 
-def test_run_cwl():
-    run_cwl("./components/single_step/single_step.cwl", {"name": "example.txt"})
-
-
 def test_find_process_in_new_project():
     # Just check how does it work
-    assert type(find_process_in_new_project(biocwltest_testing_uuid)).__name__ == 'Process'
+    assert type(find_process_in_new_project(uuid)).__name__ == 'Process'
 
 
 # Example how to run this tests on some pipeline
-def test_single_step():
+def test_test_single_step():
     run = basic_arvados_test(
-        biocwltest_testing_uuid,
+        uuid,
         "Example test",
-        "components/single_step/single_step.cwl",
+        "cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": "example.txt"
             }
@@ -52,7 +47,7 @@ def test_single_step():
         'example.txt': {
             'size': 0,
             'basename': 'example.txt',
-            'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt'
+            'location': '240a2608b2d56bb36d2b3d00ae5fcf41+53/example.txt' 
             }
             }
     assert 'example.txt' in create_ouputs_dict(run)
