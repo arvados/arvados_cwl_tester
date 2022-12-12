@@ -4,11 +4,11 @@
 :sectnums:
 :appversion: v1.0
 
-= Arvados-CWLtest
+= Arvados-cwltest - framework for testing Common Workflow Language on Arvados
 
 == Introduction
 
-Arvados-CWLtest library is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL scripts, which you can keep in your repository inside python script and run them using `pytest` package from python (https://docs.pytest.org/en/7.1.x/). Usage of this library requires some basic Python knowledge, but don't be afraid - is super easy. Let's get started!
+Arvados-cwltest library is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL scripts, which you can keep in your repository inside python script and run them using `pytest` package from python (https://docs.pytest.org/en/7.1.x/). Usage of this library requires some basic Python knowledge, but don't be afraid - is super easy. Let's get started!
 
 == Installation
 
@@ -36,7 +36,9 @@ virtualenv venv
 source venv/bin/activate
 ----
 
-=== You need to install Arvados Cwl Test via  'pip install', according to this instructions:
+=== Install Arvados-cwltest
+
+You need to install Arvados-cwltest via  'pip install', according to this instructions:
 
 [source, bash]
 ----
@@ -56,35 +58,74 @@ pip uninstall pycurl
 pip install --compile  --no-cache-dir --install-option="--with-nss" pycurl==7.44
 ----
 
-== Functionalities 
+== Steps
 
 Library contains some set of functions, that allows to run a process on Arvados and later get information about outputs and check if the files are as you expect.
 If you run the test from command line following things happen:
 
-* Empty project on Arvados is created.
-* `arvados-cwl-runner` creates a process that runs your CWL scripts inside this project.
-* Logs for the process are printed out in the terminal window.
-* Pytest status is printed out in the terminal window. If workflow status is `completed` pytest passes. If workflow status is `failed` or `cancelled` - it fails.
-* If workflow status is `completed`, tests are run on its outputs (see details below).
-* After one week project including all processes and outputs is removed from Arvados. 
-
-To know how to create tests via Python API check <<How to create tests from Python API>>.
-
-=== Tests on outputs
-
-* `check_if_collection_output_not_empty()`
-* `create_ouputs_dict()`
-** assert 'example.txt' in create_ouputs_dict(test_run)
-** assert create_ouputs_dict(test_run)['example.txt]["size"] > 0
+. Empty project on Arvados is created.
+. `arvados-cwl-runner` creates a process that runs your CWL scripts inside this project.
+. Logs for the process are printed out in the terminal window.
+. Pytest status is printed out in the terminal window. If workflow status is `completed` pytest passes. If workflow status is `failed` or `cancelled` - it fails.
+. If workflow status is `completed`, *you can develop your own tests using included functions* (<<Arvados-cwltest Functions>>).
+. After one week project including all processes and outputs is removed from Arvados. 
 
 
-== Usage Example
+== Arvados-cwltest Functions
 
 Arvados Cwl Test is implemented as Python library and can be executed using pytest (https://docs.pytest.org/en/7.1.x/)
 
-=== How to create tests from Python API
+*basic_arvados_test*
 
-Example of usage::
+This is basic function that you can use to test cwl on arvados. It returns 'Process' object, that is required as input to other testing functions. 
+[source, python]
+----
+def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
+    """
+    Run process, return process object (class Process)
+    Check if project is finished, check if project is completed.
+    Arguments:
+        target_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
+        test_name: str, name of the test
+        cwl_path: str, path to cwl file that will be executed
+        inputs_dictionary: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
+    Returns:
+        class Process
+    """
+----
+
+*create_ouputs_dict*
+[source, python]
+----
+def create_ouputs_dict(process: Process) -> dict:
+    """
+    Create dictionary with outputs from process
+    Arguments:
+        process: class Process
+    Returns:
+        Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location'' 
+    """
+----
+
+*check_if_collection_output_not_empty*
+
+[source, python]
+----
+def check_if_collection_output_not_empty(process: Process):
+    """
+    Checks if output collection in provided process is not an empty collection
+    Arguments:
+        process: class Process
+    Returns:
+        boolean - True if collection contains some files, false if is empty
+    """
+----
+
+== Examples of usage
+
+=== Create python file
+
+Define all tests you need in `test_some_name.py` file. Here you can see an example how this file can look like:
 
 [source, python]
 ----
@@ -124,7 +165,7 @@ def test_single_step():
 
 === How to use Input Variables
 
-Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `variables.json`
+Sometimes there are multiple testing scripts in single repository and there are some variables, that you would like to share between your python testing scripts, to not repeat them in every place. For this purpose Arvados CWL test contains implementation that allows to store them in json file named `./test/variables.json`
 
 For example::
 [source, json]
@@ -162,7 +203,7 @@ For example::
 }
 ----
 
-Use `FILES', 'DIRECTORIES` and `UUIDS` in python script importing them as::
+Use `FILES`, `DIRECTORIES` and `UUIDS` in python script importing them as::
 
 [source, python]
 ----
@@ -203,20 +244,6 @@ pytest -n 3
 ----
 
 And more options you can find in pytest library documentation.
-
-== Synchronize test data across Arvados instances
-
-Library contains some additional feature - arvados_synchronize_test_data. It is dedicated to teams that would like to perform tests on different arvados nodes (for example arkau, ardev, arind and other). For CWL pipelines you need to testing data. This functionality allows to synchronize testing data between arvados nodes.
-
-[source, bash]
-----
-arvados_synchronize_test_data ardev-j7d0g-k6hdltddhuq54kx arind-j7d0g-k0mddryyxb2q0tq
-----
-    positional arguments:
-      project_uuids  List project uuids where test data is stored
-    options:
-      --dry-run      Run a script without updating Arvados projects
-
 
 == Development of the library
 
