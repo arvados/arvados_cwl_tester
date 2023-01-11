@@ -2,7 +2,7 @@ from arvados_cwltest import helpers
 from arvados_cwltest.arvados_connection import find_process_in_new_project, create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
 uuid = "arind-j7d0g-u7rja16z572ldb8"
-
+uuid = "arsha-j7d0g-8czggzhqk9bizm9"
 
 def test_load_file():
     assert type(helpers.load_file("./cwl_workflows/test_single_step/test_single_step.cwl")) == list
