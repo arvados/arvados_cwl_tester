@@ -1,6 +1,6 @@
 set -eox
 
-pip install pytest cwltool pyyaml arvados-python-client
+pip install pytest pyyaml arvados-python-client
 
 # For fixing bug in libraries
 pip uninstall pycurl

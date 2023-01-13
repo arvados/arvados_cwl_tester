@@ -117,7 +117,7 @@ def check_if_collection_output_not_empty(process: Process):
 
 Define all tests you need in `test_some_name.py` file. Here you can see an example how this file can look like:
 
-```Python
+```python
 from arvados_cwltest.arvados_connection import utils
 
 
@@ -193,7 +193,7 @@ For example::
 
 Use `FILES`, `DIRECTORIES` and `UUIDS` in python script importing them as::
 
-```Python
+```python
 from arvados_cwltest.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
 
 DIRECTORIES["two_1000000_inforR_fastq"]
