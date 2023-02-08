@@ -1,6 +1,6 @@
 from arvados_cwltest.helpers import *
 from arvados_cwltest.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
-
+import numpy
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
 def test_load_file():
@@ -27,11 +27,11 @@ def test_create_sinput_yml_empty():
 
 
 # Example how to run this tests on some CommanLineTool
-
+from datetime import datetime
 def helper_single_step(input_name: str):
     run = basic_arvados_test(
         uuid,
-        "Example test",
+        f'{input_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} Monika',
         "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": input_name

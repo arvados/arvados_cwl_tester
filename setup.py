@@ -29,7 +29,7 @@ def package(name, authors, **args):
 
 
 package(
-    name="arvados-cwltest",
+    name="arvados_cwltest",
     version="0.0.1",
     description="Framework for testing Common Workflow Language on Arvados",
     keywords=["cwl", "Common Workflow Language", "arvados", "python", "testing", "bioinformatics"],
@@ -51,8 +51,8 @@ package(
     install_requires=[
         "pytest",
         "PyYAML",
-        # "arvados-python-client",
-        # "arvados-cwl-runner"
+        "arvados-python-client",
+        "arvados-cwl-runner"
     ],
     extras_require={
         "dev": [
@@ -60,6 +60,9 @@ package(
             "pre-commit",
             "pytest",
             "isort==5.9.3",
+            "pytest-parallel",
+            "numpy"
+            
         ]
     },
     python_requires="~=3.8",
