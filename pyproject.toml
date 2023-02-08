@@ -9,6 +9,7 @@ write_to = "_version.py"
 name = "arvados_cwltest"
 dependencies = [
     "pytest==7.1.2",
+    "pytest-parallel==0.1.1",
     "PyYAML==5.4.1",
     "arvados-python-client==2.4.3",
     "arvados-cwl-runner==2.4.3"
