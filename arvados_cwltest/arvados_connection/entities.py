@@ -49,21 +49,25 @@ class ProcessStatus(enum.Enum):
     RUNNING = "Running"
     CANCELLED = "Cancelled"
     QUEUED = "Queued"
+    DRAFTED = "Drafted"
 
 
 @dataclass
 class Process(Base):
     def __post_init__(self):
-        if self.container.state == "Complete" and self.container.exit_code == 0:
-            self.status = ProcessStatus.COMPLETED
-        elif self.container.state == "Complete" and self.container.exit_code != 0:
-            self.status = ProcessStatus.FAILED
-        elif self.container.state == "Cancelled":
-            self.status = ProcessStatus.CANCELLED
-        elif self.container.state == "Queued":
-            self.status = ProcessStatus.QUEUED
-        elif self.container.state == "Running":
-            self.status = ProcessStatus.RUNNING
+        if self.container:
+            if self.container.state == "Complete" and self.container.exit_code == 0:
+                self.status = ProcessStatus.COMPLETED
+            elif self.container.state == "Complete" and self.container.exit_code != 0:
+                self.status = ProcessStatus.FAILED
+            elif self.container.state == "Cancelled":
+                self.status = ProcessStatus.CANCELLED
+            elif self.container.state == "Queued":
+                self.status = ProcessStatus.QUEUED
+            elif self.container.state == "Running":
+                self.status = ProcessStatus.RUNNING
+        else:
+            self.status = ProcessStatus.DRAFTED
 
     uuid: str
     command: List[str]
@@ -85,7 +89,7 @@ class Process(Base):
     requesting_container_uuid: str
     state: str
     use_existing: bool
-    container: Container
+    container: Container = None
     status: ProcessStatus = None
 
 

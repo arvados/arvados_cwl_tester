@@ -223,7 +223,7 @@ pytest test/test_main.py -s
 To run more tests in parallel: 
 
 ```bash
-pytest -n 3
+pytest --workers 5 --tests-per-worker auto
 ```
 
 And more options you can find in pytest library documentation.
