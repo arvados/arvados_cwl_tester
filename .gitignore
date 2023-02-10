@@ -157,3 +157,6 @@ example.txt
 
 # arvados_cwltest
 logs
+
+./vscode
+_version.py

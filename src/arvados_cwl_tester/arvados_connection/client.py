@@ -1,12 +1,12 @@
 import logging
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 import arvados
 from arvados.errors import ApiError
 
-from arvados_cwltest.arvados_connection.entities import Project, Container, Process, Collection
-from arvados_cwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
+from arvados_cwl_tester.arvados_connection.entities import Project, Container, Process, Collection
+from arvados_cwl_tester.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
     CollectionNotFoundError
 
 
@@ -44,12 +44,12 @@ class ArvadosClient:
         :param parent_uuid: Target project uuid
         :return: dictionary with project data
         """
-        user = os.popen("git config user.name").read()
+        user = os.popen("git config user.name").read().strip()
 
         response = self.api.groups().create(body={
             "group_class": "project",
             "owner_uuid": parent_uuid,
-            "name": f'{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%z} {user}',
+            "name": f'{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} {user}',
             "trash_at": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         }).execute()
         return Project.from_dict(**response)
@@ -84,48 +84,15 @@ class ArvadosClient:
                 raise ProcessNotFoundError(f"No container with uuid {uuid}")
             raise
 
-    # TODO: Starting workflow from Python SDK
-    # def create_container_request(self, cwl_path: str, project_uuid: str, inputs: Dict) -> Process:
-    #     """
-    #     Create container request and start it
-    #     :param cwl_path:
-    #     :param project_uuid:
-    #     :param inputs:
-    #     :return:
-    #     """
-    #     workflow_definition = yaml.safe_load(cwl_path)
-    #     user = os.popen("git config user.name").read()
-    #     # Construct Container Request from Template (prepare workflow run)
-    #     mounts = {
-    #         '/var/lib/cwl/cwl.input.json': {'kind': 'json', 'content': inputs},
-    #         '/var/lib/cwl/workflow.json': {'kind': 'json', 'content': workflow_definition},
-    #         '/var/spool/cwl': {'kind': 'collection', 'writable': True},
-    #         'stdout': {'kind': 'file', 'path': '/var/spool/cwl/cwl.output.json'}
-    #     }
-    #
-    #     cr = {
-    #         'command': ['arvados-cwl-runner', '--local', '--api=containers', '/var/lib/cwl/workflow.json#main',
-    #                     '/var/lib/cwl/cwl.input.json'],
-    #         'name': f"Testing {os.path.basename(cwl_path)} {user}",
-    #         'mounts': mounts,
-    #         'container_image': 'arvados/jobs',
-    #         'priority': 1,
-    #         'output_path': '/var/spool/cwl',
-    #         'runtime_constraints': {'ram': 256000000, 'vcpus': 1, 'API': True},
-    #         'owner_uuid': project_uuid
-    #     }
-    #     new_cr = self.api.container_requests().create(body=cr).execute()
-    #     return Process.from_dict(**new_cr)
-    #
-    # def commit_container_request(self, process: Process):
-    #     """
-    #     Start process, only works if container request is in state `Draft`
-    #     :param process:
-    #     :return:
-    #     """
-    #     if process.state != 'Draft':
-    #         raise ContainerRunError(f"Incorrect process state, is: {process.state}, should be Draft")
-    #
-    #     response = self.api.container_requests().update(uuid=process.uuid, body={'state': 'Committed'}).execute()
-    #     container = self.get_container(response['container_uuid'])
-    #     return Process.from_dict(**response, container=container)
+    def get_container_request(self, uuid: str) -> Process:
+        try:
+            response = self.api.container_requests().get(uuid=uuid).execute()
+            if response['container_uuid']:
+                container = self.get_container(response['container_uuid'])
+            else:
+                container = None
+            return Process.from_dict(**response, container=container)
+        except ApiError as e:
+            if e.resp.status == 404:
+                raise ProcessNotFoundError(f"No container with uuid {uuid}")
+            raise
