@@ -1,6 +1,8 @@
 from arvados_cwltest.helpers import *
-from arvados_cwltest.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
-import numpy
+from arvados_cwltest.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, \
+    basic_arvados_test
+
+
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
 def test_load_file():
