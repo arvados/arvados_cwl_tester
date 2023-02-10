@@ -1,6 +1,6 @@
 from arvados_cwl_tester.helpers import *
 from arvados_cwl_tester.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
-import numpy
+
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
 def test_load_file():
@@ -28,10 +28,10 @@ def test_create_sinput_yml_empty():
 
 # Example how to run this tests on some CommanLineTool
 from datetime import datetime
-def helper_single_step(input_name: str):
+def helper_single_step(input_name: str, name=None):
     run = basic_arvados_test(
         uuid,
-        f'{input_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}',
+        name,
         "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": input_name
@@ -43,11 +43,13 @@ def helper_single_step(input_name: str):
     assert output_dict[input_name]["size"] == 0
     assert output_dict[input_name]["basename"] == input_name
 
+
+# repeat single_step multiple times to check if parallel testing works properly
 def test_step_single_step1():
-    helper_single_step("example1.txt")
+    helper_single_step("example1.txt", f"{test_step_single_step1.__name__}")
 
 def test_step_single_step2():
-    helper_single_step("example2.txt")
+    helper_single_step("example2.txt", f"{test_step_single_step2.__name__}")
 
 def test_step_single_step3():
     helper_single_step("example3.txt")
@@ -91,6 +93,8 @@ def helper_workflow(input_name):
     assert output_dict[input_name]["size"] == 0
     assert output_dict[input_name]["basename"] == input_name
 
+
+# run test_workflow multiple times to check if parallel testing works properly
 def test_workklow_1():
     helper_workflow("workflow_example1.txt")
 

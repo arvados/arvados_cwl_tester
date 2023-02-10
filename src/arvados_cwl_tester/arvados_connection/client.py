@@ -44,7 +44,7 @@ class ArvadosClient:
         :param parent_uuid: Target project uuid
         :return: dictionary with project data
         """
-        user = os.popen("git config user.name").read()
+        user = os.popen("git config user.name").read().strip()
 
         response = self.api.groups().create(body={
             "group_class": "project",

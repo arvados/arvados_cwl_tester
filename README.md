@@ -8,7 +8,6 @@
 
 ### Set up conda environment
 
-
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
 sh Miniconda3-py38_4.12.0-Linux-x86_64.sh
@@ -32,22 +31,8 @@ source venv/bin/activate
 
 You need to install arvados_cwl_tester via  'pip install', according to this instructions:
 
-TODO different method of installation
-```bash
-pip install arvados-cwl-tester --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
 ```
-
-where `<your_personal_token>` is token with `read_api` scope that can be created on the GitLab in Preferences -> Access Tokens.
-
-
-To install specific version use  `arvados-cwl-tester==<version>`. Example: `arvados-cwl-tester==0.2.dev16+g3858809`
-
-In case of `ImportError: pycurl: libcurl link-time ssl backend (nss) is different from compile-time ssl backend (none/other)` error
-fix it with:
-
-```bash
-pip uninstall pycurl
-pip install --compile  --no-cache-dir --install-option="--with-nss" pycurl==7.44
+pip install
 ```
 
 ## Steps
