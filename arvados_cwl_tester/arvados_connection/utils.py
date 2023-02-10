@@ -1,10 +1,10 @@
-from arvados_cwltest.arvados_connection.client import ArvadosClient
-from arvados_cwltest.arvados_connection.entities import Process, ProcessStatus
-from arvados_cwltest.cwl_runner import run_cwl_arvados
-from arvados_cwltest.helpers import Colors, load_json
+from arvados_cwl_tester.arvados_connection.client import ArvadosClient
+from arvados_cwl_tester.arvados_connection.entities import Process, ProcessStatus
+from arvados_cwl_tester.cwl_runner import run_cwl_arvados
+from arvados_cwl_tester.helpers import Colors, load_json
 import os
 
-# TODO consider to move testing functions form utils to init, to not require from user complicated import: arvados_cwltest.arvados_connection.utils.nazwa
+# TODO consider to move testing functions form utils to init, to not require from user complicated import: arvados_cwl_tester.arvados_connection.utils.nazwa
 
 def create_new_project(target: str, test_name: str):
     # Create project in target

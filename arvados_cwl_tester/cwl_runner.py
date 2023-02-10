@@ -3,7 +3,7 @@ from io import StringIO
 
 import arvados_cwl
 
-from arvados_cwltest.helpers import create_input_yml
+from arvados_cwl_tester.helpers import create_input_yml
 
 
 def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):

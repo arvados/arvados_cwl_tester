@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 import arvados
 from arvados.errors import ApiError
 
-from arvados_cwltest.arvados_connection.entities import Project, Container, Process, Collection
-from arvados_cwltest.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
+from arvados_cwl_tester.arvados_connection.entities import Project, Container, Process, Collection
+from arvados_cwl_tester.arvados_connection.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
     CollectionNotFoundError
 
 

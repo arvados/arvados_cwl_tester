@@ -4,7 +4,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-assert sys.version_info >= (3, 8, 0), "arvados-cwltest requires Python 3.8.0+"
+assert sys.version_info >= (3, 8, 0), "arvados-cwl-tester requires Python 3.8.0+"
 
 CURRENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(CURRENT_DIR))
@@ -29,7 +29,7 @@ def package(name, authors, **args):
 
 
 package(
-    name="arvados_cwltest",
+    name="arvados_cwl_tester",
     version="0.0.1",
     description="Framework for testing Common Workflow Language on Arvados",
     keywords=["cwl", "Common Workflow Language", "arvados", "python", "testing", "bioinformatics"],
@@ -45,8 +45,8 @@ package(
     ],
     # url="https://arvados-cwltest.com/",
     project_urls={
-        "Bug Tracker": "https://github.com/arvados/arvados-cwltest/issues",
-        "Source Code": "https://github.com/arvados/arvados-cwltest",
+        "Bug Tracker": "https://github.com/arvados/arvados-cwl-tester/issues",
+        "Source Code": "https://github.com/arvados/arvados-cwl-tester",
     },
     install_requires=[
         "pytest",

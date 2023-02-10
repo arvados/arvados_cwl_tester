@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 write_to = "_version.py"
 
 [project]
-name = "arvados_cwltest"
+name = "arvados_cwl_tester"
 dependencies = [
     "pytest==7.1.2",
     "pytest-parallel==0.1.1",
@@ -17,4 +17,4 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["arvados_cwltest"]
+packages = ["arvados_cwl_tester"]

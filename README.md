@@ -1,8 +1,8 @@
-# Arvados-cwltest - framework for testing Common Workflow Language on Arvados
+# arvados_cwl_tester - framework for testing Common Workflow Language on Arvados
 
 ## Introduction
 
-Arvados-cwltest library is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL scripts, which you can keep in your repository inside python script and run them using `pytest` package from python (https://docs.pytest.org/en/7.1.x/). Usage of this library requires some basic Python knowledge, but don't be afraid - is super easy. Let's get started!
+*arvados_cwl_tester* library is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL scripts, which you can keep in your repository inside python script and run them using `pytest` package from python (https://docs.pytest.org/en/7.1.x/). Usage of this library requires some basic Python knowledge, but don't be afraid - is super easy. Let's get started!
 
 ## Installation
 
@@ -28,19 +28,19 @@ virtualenv venv
 source venv/bin/activate
 ```
 
-### Install arvados-cwltest
+### Install arvados-cwl-tester
 
-You need to install Arvados-cwltest via  'pip install', according to this instructions:
+You need to install arvados_cwl_tester via  'pip install', according to this instructions:
 
 TODO different method of installation
 ```bash
-pip install arvados-cwltest --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
+pip install arvados-cwl-tester --extra-index-url https://__token__:<your_personal_token>@code.roche.com/api/v4/projects/34319/packages/pypi/simple
 ```
 
 where `<your_personal_token>` is token with `read_api` scope that can be created on the GitLab in Preferences -> Access Tokens.
 
 
-To install specific version use  `arvados-cwltest==<version>`. Example: `arvados-cwltest==0.2.dev16+g3858809`
+To install specific version use  `arvados-cwl-tester==<version>`. Example: `arvados-cwl-tester==0.2.dev16+g3858809`
 
 In case of `ImportError: pycurl: libcurl link-time ssl backend (nss) is different from compile-time ssl backend (none/other)` error
 fix it with:
@@ -59,11 +59,11 @@ If you run the test from command line following things happen:
 . `arvados-cwl-runner` creates a process that runs your CWL scripts inside this project.
 . Logs for the process are printed out in the terminal window.
 . Pytest status is printed out in the terminal window. If workflow status is `completed` pytest passes. If workflow status is `failed` or `cancelled` - it fails.
-. If workflow status is `completed`, *you can develop your own tests using included functions* (<<Arvados-cwltest Functions>>).
+. If workflow status is `completed`, *you can develop your own tests using included functions* (<<Arvados-cwl-tester Functions>>).
 . After one week project including all processes and outputs is removed from Arvados. 
 
 
-## Arvados-cwltest Functions
+## Arvados-cwl-tester Functions
 
 Arvados Cwl Test is implemented as Python library and can be executed using pytest (https://docs.pytest.org/en/7.1.x/)
 
@@ -118,7 +118,7 @@ def check_if_collection_output_not_empty(process: Process):
 Define all tests you need in `test_some_name.py` file. Here you can see an example how this file can look like:
 
 ```python
-from arvados_cwltest.arvados_connection import utils
+from arvados_cwl_tester.arvados_connection import utils
 
 
 def test_single_step():
@@ -194,7 +194,7 @@ For example::
 Use `FILES`, `DIRECTORIES` and `UUIDS` in python script importing them as::
 
 ```python
-from arvados_cwltest.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
+from arvados_cwl_tester.arvados_connection.utils import FILES, DIRECTORIES, UUIDS
 
 DIRECTORIES["two_1000000_inforR_fastq"]
 UUIDS["akau"]
