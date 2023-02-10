@@ -19,7 +19,7 @@ def package(name, authors, **args):
         long_description_content_type="text/markdown",
         author=", ".join(authors),
         setup_requires=["setuptools>=45", "wheel"],
-        package_dir={name: name},
+        package_dir={name: "src"},
         py_modules=[name],
         packages=[name],
         include_package_data=True,
