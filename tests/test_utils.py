@@ -1,8 +1,6 @@
 from arvados_cwltest.helpers import *
-from arvados_cwltest.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, \
-    basic_arvados_test
-
-
+from arvados_cwltest.arvados_connection import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
+import numpy
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
 def test_load_file():
@@ -33,7 +31,7 @@ from datetime import datetime
 def helper_single_step(input_name: str):
     run = basic_arvados_test(
         uuid,
-        f'{input_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} Monika',
+        f'{input_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}',
         "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": input_name
@@ -77,3 +75,27 @@ def test_step_single_step10():
 
 def test_step_single_step10():
     helper_single_step("example11.txt")
+
+def helper_workflow(input_name):
+    run = basic_arvados_test(
+        uuid,
+        f"my test {input_name}",
+        "./tests/cwl_workflows/test_workflow.cwl",
+        {
+            "name": input_name
+            }
+            )
+    assert check_if_collection_output_not_empty(run)
+    output_dict = create_ouputs_dict(run)
+    assert input_name in output_dict
+    assert output_dict[input_name]["size"] == 0
+    assert output_dict[input_name]["basename"] == input_name
+
+def test_workklow_1():
+    helper_workflow("workflow_example1.txt")
+
+def test_workklow_2():
+    helper_workflow("workflow_example2.txt")
+
+def test_workklow_3():
+    helper_workflow("workflow_example2.txt")
