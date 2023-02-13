@@ -1,10 +1,21 @@
-from arvados_cwl_tester.arvados_connection.client import ArvadosClient
-from arvados_cwl_tester.arvados_connection.entities import Process, ProcessStatus
-from arvados_cwl_tester.cwl_runner import run_cwl_arvados
-from arvados_cwl_tester.helpers import Colors, load_json
 import os
 
-# TODO consider to move testing functions form utils to init, to not require from user complicated import: arvados_cwl_tester.arvados_connection.utils.nazwa
+from arvados_cwl_tester.client import ArvadosClient
+from arvados_cwl_tester.cwl_runner import run_cwl_arvados
+from arvados_cwl_tester.entities import Process, ProcessStatus
+from arvados_cwl_tester.helpers import Colors
+
+
+__all__ = [
+    "create_new_project",
+    "find_process_in_new_project",
+    "save_file",
+    "check_if_process_is_finished",
+    "check_if_project_is_completed",
+    "check_if_collection_output_not_empty",
+    "basic_arvados_test",
+    "create_ouputs_dict",
+]
 
 def create_new_project(target: str, test_name: str):
     # Create project in target
@@ -69,19 +80,6 @@ def check_if_collection_output_not_empty(process: Process):
         return True
     print(Colors.ERROR + f"'{process.name}': Output collection is empty :/")
     return False
-    
-
-FILES = None
-VARIABLES = None
-DIRECTORIES = None
-UUIDS = None
-
-if os.path.isfile("./test/variables.json"):
-    VARIABLES = load_json("./test/variables.json")
-    
-    FILES = VARIABLES["resources"]["files"]
-    UUIDS = VARIABLES["testing_projects"]
-    DIRECTORIES = VARIABLES["resources"]["directories"]
 
 
 def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
