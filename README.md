@@ -103,8 +103,7 @@ def check_if_collection_output_not_empty(process: Process):
 Define all tests you need in `test_some_name.py` file. Here you can see an example how this file can look like:
 
 ```python
-from arvados_cwl_tester.arvados_connection import utils
-
+from arvados_cwl_tester import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
 def test_single_step():
 
