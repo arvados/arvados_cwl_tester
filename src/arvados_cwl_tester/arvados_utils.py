@@ -3,7 +3,7 @@ import os
 from arvados_cwl_tester.client import ArvadosClient
 from arvados_cwl_tester.cwl_runner import run_cwl_arvados
 from arvados_cwl_tester.entities import Process, ProcessStatus
-from arvados_cwl_tester.helpers import Colors, load_json
+from arvados_cwl_tester.helpers import Colors
 
 
 __all__ = [
@@ -80,19 +80,6 @@ def check_if_collection_output_not_empty(process: Process):
         return True
     print(Colors.ERROR + f"'{process.name}': Output collection is empty :/")
     return False
-    
-
-FILES = None
-VARIABLES = None
-DIRECTORIES = None
-UUIDS = None
-
-if os.path.isfile("./test/variables.json"):
-    VARIABLES = load_json("./test/variables.json")
-    
-    FILES = VARIABLES["resources"]["files"]
-    UUIDS = VARIABLES["testing_projects"]
-    DIRECTORIES = VARIABLES["resources"]["directories"]
 
 
 def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
