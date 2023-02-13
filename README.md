@@ -1,4 +1,4 @@
-# arvados_cwl_tester - framework for testing Common Workflow Language on Arvados
+# Framework for testing Common Workflow Language on Arvados - arvados_cwl_tester
 
 ## Introduction
 
@@ -173,7 +173,7 @@ def test_single_step():
 
 ```
 
-### How to Execute tets in parallel
+### How to execute tests in parallel
 
 
 Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time. 
