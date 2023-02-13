@@ -1,5 +1,5 @@
-from arvados_cwltest.helpers import create_input_yml, load_file
-from arvados_cwltest.arvados_connection.utils import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
+from arvados_cwl_tester.helpers import create_input_yml, load_file
+from arvados_cwl_tester import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
@@ -38,6 +38,23 @@ def test_single_step():
             "name": input_name
         }
     )
+    assert check_if_collection_output_not_empty(run)
+    output_dict = create_ouputs_dict(run)
+    assert input_name in output_dict
+    assert output_dict[input_name]["size"] == 0
+    assert output_dict[input_name]["basename"] == input_name
+
+
+def test_workflow():
+    input_name = "workflow_example.txt"
+    run = basic_arvados_test(
+        uuid,
+        f"my test {input_name}",
+        "./tests/cwl_workflows/test_workflow.cwl",
+        {
+            "name": input_name
+            }
+            )
     assert check_if_collection_output_not_empty(run)
     output_dict = create_ouputs_dict(run)
     assert input_name in output_dict
