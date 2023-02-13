@@ -189,6 +189,6 @@ pytest --workers 10 --tests-per-worker auto
 To activate development environment:
 
 ```bash
-bash setup.sh
+source setup.sh
 ```
 
