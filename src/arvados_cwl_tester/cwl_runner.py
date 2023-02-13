@@ -28,21 +28,3 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
     if error or exit_code:
         print(error)
         return
-
-
-# --no-wait option returns process uuid, not cwl output:
-# usage:
-# process_uuid = output.getvalue().strip()
-# process = asyncio.run(_wait_for_container_finish(process_uuid))
-
-# async def _wait_for_container_finish(process_uuid: str):
-#     client = ArvadosClient()
-#     while True:
-#         await asyncio.sleep(5)
-#         process = client.get_container_request(process_uuid)
-#         if process.status in [
-#             ProcessStatus.COMPLETED,
-#             ProcessStatus.FAILED,
-#             ProcessStatus.CANCELLED
-#         ]:
-#             return process
