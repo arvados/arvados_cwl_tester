@@ -1,5 +1,5 @@
-from arvados_cwl_tester.helpers import create_input_yml, load_file
-from arvados_cwl_tester import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
+from arvados_cwltest.helpers import create_input_yml, load_file
+from arvados_cwltest.arvados_connection.utils import create_ouputs_dict, check_if_collection_output_not_empty, basic_arvados_test
 
 uuid = "arind-j7d0g-11cq990ue0u0cyg"
 
@@ -33,7 +33,7 @@ def test_single_step():
     run = basic_arvados_test(
         uuid,
         "Example test",
-        "./cwl_workflows/test_single_step/test_single_step.cwl",
+        "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
         {
             "name": input_name
         }
