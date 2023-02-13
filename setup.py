@@ -30,7 +30,7 @@ def package(name, authors, **args):
 
 package(
     name="arvados_cwl_tester",
-    version="0.0.1",
+    version="Beta",
     description="Framework for testing Common Workflow Language on Arvados",
     keywords=["cwl", "Common Workflow Language", "arvados", "python", "testing", "bioinformatics"],
     authors=[
@@ -49,20 +49,18 @@ package(
         "Source Code": "https://github.com/arvados/arvados-cwl-tester",
     },
     install_requires=[
-        "pytest",
-        "PyYAML",
-        "arvados-python-client",
-        "arvados-cwl-runner"
+        "pytest==7.1.2",
+        "PyYAML==5.4.1",
+        "arvados-python-client==2.4.3",
+        "arvados-cwl-runner==2.4.3",
+        "pytest-parallel==0.1.1",
+        "pytest==7.1.2",
     ],
     extras_require={
         "dev": [
             "black==22.6.0",
             "pre-commit",
-            "pytest",
-            "isort==5.9.3",
-            "pytest-parallel",
-            "numpy"
-            
+            "isort==5.9.3"
         ]
     },
     python_requires="~=3.8",
