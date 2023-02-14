@@ -19,10 +19,12 @@ virtualenv venv
 source venv/bin/activate
 ```
 
-2. Install arvados_cwl_tester
+2. Install arvados-cwl-tester
 
 ```bash
-pip install arvados_cwl_tester
+git clone https://github.com/arvados/arvados_cwl_tester.git
+cd arvados_cwl_tester
+pip install .
 ```
 
 ### Write your first test
