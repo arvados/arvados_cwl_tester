@@ -1,7 +1,7 @@
 import os
 
 from arvados_cwl_tester.arvados_utils import *
-from .helpers import load_json
+from arvados_cwl_tester.helpers import load_json
 
 # load variables from json file
 FILES = None
