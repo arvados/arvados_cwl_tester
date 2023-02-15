@@ -1,5 +1,9 @@
 # Framework for testing Common Workflow Language on Arvados - arvados_cwl_tester
 
+Note: This is not the final, official version
+
+Thank you for interest in arvados-cwl-tester framework. Please note that the current version is not the final, official version. While the frameworkk is usable , the work is still in progress. The official version will be released soon. 
+
 ## Introduction
 
 **arvados_cwl_tester** framework is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL CommandLineTools and Workflows and run them in parallel on Arvados, using `pytest`.
@@ -12,7 +16,7 @@ Every test runs process on Arvados in temporary subproject, that will be removed
 
 ### Setup environment
 
-1. Create testing invironment
+1. Create testing environment
 
 ```bash
 virtualenv venv
