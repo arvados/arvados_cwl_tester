@@ -14,12 +14,11 @@ def package(name, authors, **args):
 
     setup(
         name=name,
-        entry_points={"console_scripts": ["{} = {}.__main__:main".format(name, name)]},
         long_description=long_description,
         long_description_content_type="text/markdown",
         author=", ".join(authors),
         setup_requires=["setuptools>=45", "wheel"],
-        package_dir={name: "src"},
+        package_dir={"": "src"},
         py_modules=[name],
         packages=[name],
         include_package_data=True,
