@@ -6,13 +6,16 @@ import arvados
 from arvados.errors import ApiError
 
 from arvados_cwl_tester.entities import Project, Container, Process, Collection
-from arvados_cwl_tester.exceptions import ProjectNotFoundError, ProcessNotFoundError, \
-    CollectionNotFoundError
+from arvados_cwl_tester.exceptions import (
+    ProjectNotFoundError,
+    ProcessNotFoundError,
+    CollectionNotFoundError,
+)
 
 
 class ArvadosClient:
     def __init__(self):
-        self.api = arvados.api('v1')
+        self.api = arvados.api("v1")
 
     def get_project(self, uuid: str) -> Project:
         """
@@ -46,18 +49,26 @@ class ArvadosClient:
         """
         user = os.popen("git config user.name").read().strip()
 
-        response = self.api.groups().create(body={
-            "group_class": "project",
-            "owner_uuid": parent_uuid,
-            "name": f'{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} {user}',
-            "trash_at": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-        }).execute()
+        response = (
+            self.api.groups()
+            .create(
+                body={
+                    "group_class": "project",
+                    "owner_uuid": parent_uuid,
+                    "name": f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} {user}",
+                    "trash_at": (datetime.now() + timedelta(days=7)).strftime(
+                        "%Y-%m-%d"
+                    ),
+                }
+            )
+            .execute()
+        )
         return Project.from_dict(**response)
 
     def list_container_requests_in_project(self, parent_uuid: str):
         return arvados.util.keyset_list_all(
             self.api.container_requests().list,
-            filters=[["owner_uuid", "=", parent_uuid]]
+            filters=[["owner_uuid", "=", parent_uuid]],
         )
 
     def get_container_request_by_parent_uuid(self, parent_uuid: str) -> Process:
@@ -68,11 +79,13 @@ class ArvadosClient:
         """
         requests = list(self.list_container_requests_in_project(parent_uuid))
         if not requests:
-            raise ProcessNotFoundError(f"No processes are found in {parent_uuid} project")
+            raise ProcessNotFoundError(
+                f"No processes are found in {parent_uuid} project"
+            )
         if len(requests) > 1:
             logging.warning(f"Multiple processes found in {parent_uuid}")
         response = requests[0]
-        container = self.get_container(response['container_uuid'])
+        container = self.get_container(response["container_uuid"])
         return Process.from_dict(**response, container=container)
 
     def get_container(self, uuid: str) -> Container:
@@ -87,8 +100,8 @@ class ArvadosClient:
     def get_container_request(self, uuid: str) -> Process:
         try:
             response = self.api.container_requests().get(uuid=uuid).execute()
-            if response['container_uuid']:
-                container = self.get_container(response['container_uuid'])
+            if response["container_uuid"]:
+                container = self.get_container(response["container_uuid"])
             else:
                 container = None
             return Process.from_dict(**response, container=container)

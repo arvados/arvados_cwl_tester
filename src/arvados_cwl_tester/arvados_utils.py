@@ -17,6 +17,7 @@ __all__ = [
     "create_ouputs_dict",
 ]
 
+
 def create_new_project(target: str, test_name: str):
     # Create project in target
     client = ArvadosClient()
@@ -35,9 +36,9 @@ def save_file(collection_uuid: str, filename: str, output_filename: str = None):
     collection = client.get_collection(collection_uuid)
     if not os.path.exists("./logs"):
         os.makedirs("./logs")
-    #TODO: add to this file command of the process
-    with collection.reader.open(filename, 'r') as file_reader:
-        with open(f"./logs/{output_filename}" or f"./logs/{filename}", 'w') as file:
+    # TODO: add to this file command of the process
+    with collection.reader.open(filename, "r") as file_reader:
+        with open(f"./logs/{output_filename}" or f"./logs/{filename}", "w") as file:
             file.write(file_reader.read())
 
 
@@ -45,11 +46,11 @@ def check_if_process_is_finished(process: Process, test_name: str):
     if process.status in [
         ProcessStatus.COMPLETED,
         ProcessStatus.FAILED,
-        ProcessStatus.CANCELLED
+        ProcessStatus.CANCELLED,
     ]:
         print(Colors.OKBLUE + f"Process '{test_name}' is finished!")
         return True
-    
+
     # print(process.log_uuid.stderr)
     print(process.log_uuid.command)
     return False
@@ -57,11 +58,18 @@ def check_if_process_is_finished(process: Process, test_name: str):
 
 def check_if_project_is_completed(process: Process, test_name: str):
     if process.status == ProcessStatus.COMPLETED:
-        print(Colors.OKGREEN + f"Process '{test_name}' was completed successfully :-) !")
+        print(
+            Colors.OKGREEN + f"Process '{test_name}' was completed successfully :-) !"
+        )
         return True
-    log_name = f"{test_name.replace('.', '_').replace(' ', '_')}_{process.uuid}_stderr.txt"
-    print(Colors.ERROR + f"Process '{test_name}' failed or cancelled :(, saving logs to {log_name}")
-    save_file(process.log_uuid, 'stderr.txt', log_name)
+    log_name = (
+        f"{test_name.replace('.', '_').replace(' ', '_')}_{process.uuid}_stderr.txt"
+    )
+    print(
+        Colors.ERROR
+        + f"Process '{test_name}' failed or cancelled :(, saving logs to {log_name}"
+    )
+    save_file(process.log_uuid, "stderr.txt", log_name)
     return False
 
 
@@ -82,7 +90,9 @@ def check_if_collection_output_not_empty(process: Process):
     return False
 
 
-def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs_dictionary: dict=None) -> Process:
+def basic_arvados_test(
+    target_project: str, test_name: str, cwl_path: str, inputs_dictionary: dict = None
+) -> Process:
     """
     Run process, return process object (class Process)
     Check if project is finished, check if project is completed.
@@ -96,7 +106,9 @@ def basic_arvados_test(target_project:str, test_name: str, cwl_path: str, inputs
     """
 
     new_created_project = create_new_project(target_project, test_name)
-    run_cwl_arvados(cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name)
+    run_cwl_arvados(
+        cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name
+    )
 
     process = find_process_in_new_project(new_created_project.uuid)
 
@@ -111,7 +123,7 @@ def create_ouputs_dict(process: Process) -> dict:
     Arguments:
         process: class Process
     Returns:
-        Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location'' 
+        Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location''
     """
     client = ArvadosClient()
     collection = client.get_collection(process.output_uuid)
@@ -122,9 +134,10 @@ def create_ouputs_dict(process: Process) -> dict:
         outputs[file.name()] = {
             "size": file.size(),
             "basename": file.name(),
-            "location": f"{data_hash}/{file.name()}"
+            "location": f"{data_hash}/{file.name()}",
         }
     return outputs
+
 
 # def run_pipeline_on_outputs():
 #     # just idea

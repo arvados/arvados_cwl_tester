@@ -9,10 +9,11 @@ from arvados import CollectionReader
 
 @dataclass
 class Base:
-
     @classmethod
     def from_dict(cls, **data):
-        return cls(**{key: val for key, val in data.items() if key in cls.__dataclass_fields__})
+        return cls(
+            **{key: val for key, val in data.items() if key in cls.__dataclass_fields__}
+        )
 
 
 @dataclass

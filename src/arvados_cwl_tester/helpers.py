@@ -8,17 +8,17 @@ import tempfile
 
 
 class Colors:
-    TESTING_INFO = '\033[95m'
-    OKBLUE = '\033[94m'
-    RUNNING = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    ERROR = '\033[91m'
-    BOLD = '\033[1m'
+    TESTING_INFO = "\033[95m"
+    OKBLUE = "\033[94m"
+    RUNNING = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    ERROR = "\033[91m"
+    BOLD = "\033[1m"
 
 
 def load_json(path) -> dict:
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         data = json.load(f)
     return data
 
@@ -43,14 +43,11 @@ def create_input_yml(inputs_dictionary: Dict = None):
     """
     Create temp file with random name to avoid collisions with other concurrent tests
     """
-    with tempfile.NamedTemporaryFile(mode='w') as file:
+    with tempfile.NamedTemporaryFile(mode="w") as file:
         if inputs_dictionary:
             yaml.dump(inputs_dictionary, file)
         yield file.name
 
 
 def create_dict_for_input_file(name: str, resources) -> dict:
-    return {
-        "class": "File",
-        "path": os.path.join(resources, name)
-    }
+    return {"class": "File", "path": os.path.join(resources, name)}

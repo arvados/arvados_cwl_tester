@@ -9,6 +9,7 @@ assert sys.version_info >= (3, 8, 0), "arvados-cwl-tester requires Python 3.8.0+
 CURRENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(CURRENT_DIR))
 
+
 def package(name, authors, **args):
     long_description = (CURRENT_DIR / "README.md").read_text(encoding="utf8")
 
@@ -31,11 +32,18 @@ package(
     name="arvados_cwl_tester",
     version="Beta",
     description="Framework for testing Common Workflow Language on Arvados",
-    keywords=["cwl", "Common Workflow Language", "arvados", "python", "testing", "bioinformatics"],
+    keywords=[
+        "cwl",
+        "Common Workflow Language",
+        "arvados",
+        "python",
+        "testing",
+        "bioinformatics",
+    ],
     authors=[
         "Monika Krzyżanowska <monigenomi@gmail.com>",
         "Joanna Butkiewicz <joanna-butkiewicz>",
-        "Agata Dziedzic <betula185>"
+        "Agata Dziedzic <betula185>",
     ],
     classifiers=[
         "Topic :: Software Development :: Testing",
@@ -55,12 +63,6 @@ package(
         "pytest-parallel==0.1.1",
         "pytest==7.1.2",
     ],
-    extras_require={
-        "dev": [
-            "black==22.6.0",
-            "pre-commit",
-            "isort==5.9.3"
-        ]
-    },
+    extras_require={"dev": ["black==22.6.0", "pre-commit", "isort==5.9.3"]},
     python_requires="~=3.8",
 )
