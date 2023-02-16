@@ -5,6 +5,9 @@ import yaml
 import os
 import json
 import tempfile
+import subprocess
+
+GIT_USERNAME = None
 
 
 class Colors:
@@ -51,3 +54,16 @@ def create_input_yml(inputs_dictionary: Dict = None):
 
 def create_dict_for_input_file(name: str, resources) -> dict:
     return {"class": "File", "path": os.path.join(resources, name)}
+
+
+def get_git_username():
+    global GIT_USERNAME
+    if GIT_USERNAME is not None:
+        return GIT_USERNAME
+
+    try:
+        output = subprocess.check_output(["git", "config", "user.name"])
+        GIT_USERNAME = output.decode("utf-8").strip()
+        return GIT_USERNAME
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None

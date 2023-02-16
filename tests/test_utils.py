@@ -1,11 +1,7 @@
 from arvados_cwl_tester.helpers import create_input_yml, load_file
-from arvados_cwl_tester import (
-    create_ouputs_dict,
-    check_if_collection_output_not_empty,
-    basic_arvados_test,
-)
+from arvados_cwl_tester import arvados_run
 
-uuid = "arind-j7d0g-11cq990ue0u0cyg"
+TESTING_PROJECT = "arind-j7d0g-11cq990ue0u0cyg"
 
 
 def test_load_file():
@@ -34,32 +30,27 @@ def test_create_input_yml_empty():
     create_input_yml({})
 
 
-# Example how to run this tests on some CommanLineTool
 def test_single_step():
-    input_name = "example.txt"
-    run = basic_arvados_test(
-        uuid,
-        "Example test",
+    out = arvados_run(
+        TESTING_PROJECT,
         "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
-        {"name": input_name},
+        {"name": "example.txt"},
     )
-    assert check_if_collection_output_not_empty(run)
-    output_dict = create_ouputs_dict(run)
-    assert input_name in output_dict
-    assert output_dict[input_name]["size"] == 0
-    assert output_dict[input_name]["basename"] == input_name
+    assert len(out["testing_result"]) == 1
+    assert out["testing_result"]["size"] == 0
+    assert out["testing_result"]["basename"] == "example.txt"
 
 
 def test_workflow():
-    input_name = "workflow_example.txt"
-    run = basic_arvados_test(
-        uuid,
-        f"my test {input_name}",
+    out = arvados_run(
+        TESTING_PROJECT,
         "./tests/cwl_workflows/test_workflow.cwl",
-        {"name": input_name},
+        {"name": "workflow_example.txt"},
     )
-    assert check_if_collection_output_not_empty(run)
-    output_dict = create_ouputs_dict(run)
-    assert input_name in output_dict
-    assert output_dict[input_name]["size"] == 0
-    assert output_dict[input_name]["basename"] == input_name
+    assert len(out["testing_results"]) == 3
+    assert out["testing_results"][0]["size"] == 0
+    assert out["testing_results"][0]["basename"] == "workflow_example.txt"
+    assert out["testing_results"][1]["size"] == 0
+    assert out["testing_results"][1]["basename"] == "workflow_example.txt"
+    assert out["testing_results"][2]["size"] == 0
+    assert out["testing_results"][2]["basename"] == "workflow_example.txt"

@@ -13,8 +13,8 @@ __all__ = [
     "check_if_process_is_finished",
     "check_if_project_is_completed",
     "check_if_collection_output_not_empty",
-    "basic_arvados_test",
-    "create_ouputs_dict",
+    "arvados_run",
+    "create_outputs_dict",
 ]
 
 
@@ -73,51 +73,7 @@ def check_if_project_is_completed(process: Process, test_name: str):
     return False
 
 
-def check_if_collection_output_not_empty(process: Process):
-    """
-    Checks if output collection in provided process is not an empty collection
-    Arguments:
-        process: class Process
-    Returns:
-        boolean - True if collection contains some files, false if is empty
-    """
-    client = ArvadosClient()
-    output = client.get_collection(process.output_uuid)
-    if output.file_count > 0:
-        print(Colors.OKGREEN + f"'{process.name}': Output collection is not empty.")
-        return True
-    print(Colors.ERROR + f"'{process.name}': Output collection is empty :/")
-    return False
-
-
-def basic_arvados_test(
-    target_project: str, test_name: str, cwl_path: str, inputs_dictionary: dict = None
-) -> Process:
-    """
-    Run process, return process object (class Process)
-    Check if project is finished, check if project is completed.
-    Arguments:
-        target_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
-        test_name: str, name of the test
-        cwl_path: str, path to cwl file that will be executed
-        inputs_dictionary: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
-    Returns:
-        class Process
-    """
-
-    new_created_project = create_new_project(target_project, test_name)
-    run_cwl_arvados(
-        cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name
-    )
-
-    process = find_process_in_new_project(new_created_project.uuid)
-
-    assert check_if_process_is_finished(process, test_name)
-    assert check_if_project_is_completed(process, test_name)
-    return process
-
-
-def create_ouputs_dict(process: Process) -> dict:
+def create_outputs_dict(process: Process) -> dict:
     """
     Create dictionary with outputs from process
     Arguments:
@@ -139,5 +95,62 @@ def create_ouputs_dict(process: Process) -> dict:
     return outputs
 
 
-# def run_pipeline_on_outputs():
-#     # just idea
+def arvados_run(
+    target_project: str, test_name: str, cwl_path: str, inputs_dictionary: dict = None
+) -> Process:
+    """
+    Run process, return process object (class Process)
+    Check if project is finished, check if project is completed.
+    Arguments:
+        target_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
+        test_name: str, name of the test
+        cwl_path: str, path to cwl file that will be executed
+        inputs_dictionary: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
+    Returns:
+        dict, containing outputs filenames as keys and dictionaries as values,
+        with following fields: 'size', 'basename' and 'location'
+    """
+
+    new_created_project = create_new_project(target_project, test_name)
+
+    run_cwl_arvados(
+        cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name
+    )
+
+    process = find_process_in_new_project(new_created_project.uuid)
+
+    assert check_if_process_is_finished(process, test_name)
+    assert check_if_project_is_completed(process, test_name)
+
+    return create_outputs_dict(process)
+
+
+def get_current_pytest_name() -> str:
+    """
+    Get current pytest name
+    Returns:
+        str, current pytest name
+    """
+    if "PYTEST_CURRENT_TEST" not in os.environ:
+        raise Exception("arvados_run can be used only in pytest test")
+
+    return os.environ["PYTEST_CURRENT_TEST"].split(":")[-1].split(" ")[0]
+
+
+def arvados_test(project_uuid: str, cwl_path: str, inputs_dictionary: dict = None):
+    arvados_run(project_uuid, get_current_pytest_name(), cwl_path, inputs_dictionary)
+
+
+def arvados_dir(name: str) -> dict:
+    return {"class": "Directory", "path": name}
+
+
+def arvados_file(name: str, *secondary_files: list) -> dict:
+    return {
+        "class": "File",
+        "path": name,
+        "secondaryFiles": [
+            {"class": "File", "path": secondary_file}
+            for secondary_file in secondary_files
+        ],
+    }

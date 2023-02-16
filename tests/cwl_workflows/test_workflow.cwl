@@ -30,6 +30,6 @@ steps:
     out: [testing_result]
 
 outputs:
-  testing_result:
+  testing_results:
     type: File[]
     outputSource: [single_step_1/testing_result, single_step_2/testing_result, single_step_3/testing_result]

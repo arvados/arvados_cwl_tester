@@ -12,6 +12,8 @@ from arvados_cwl_tester.exceptions import (
     CollectionNotFoundError,
 )
 
+from arvados_cwl_tester.helpers import get_git_username
+
 
 class ArvadosClient:
     def __init__(self):
@@ -47,7 +49,12 @@ class ArvadosClient:
         :param parent_uuid: Target project uuid
         :return: dictionary with project data
         """
-        user = os.popen("git config user.name").read().strip()
+
+        git_username = get_git_username()
+        subproject_name = f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}"
+
+        if git_username:
+            subproject_name.append(f" {git_username}")
 
         response = (
             self.api.groups()
@@ -55,7 +62,7 @@ class ArvadosClient:
                 body={
                     "group_class": "project",
                     "owner_uuid": parent_uuid,
-                    "name": f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z} {user}",
+                    "name": subproject_name,
                     "trash_at": (datetime.now() + timedelta(days=7)).strftime(
                         "%Y-%m-%d"
                     ),
