@@ -1,6 +1,5 @@
 from arvados_cwl_tester.helpers import create_input_yml, load_file
-from arvados_cwl_tester.arvados_utils import create_outputs_dict
-from arvados_cwl_tester import arvados_run
+from arvados_cwl_tester import *
 
 TESTING_PROJECT = "arind-j7d0g-11cq990ue0u0cyg"
 
@@ -35,25 +34,32 @@ def test_create_input_yml_empty():
 
 
 def test_single_step():
-    out = arvados_run(
+    result = arvados_run(
         TESTING_PROJECT,
         "./tests/cwl_workflows/test_single_step/test_single_step.cwl",
         {"name": "example.txt"},
     )
-    print(out)
-    
-    # TODO implement out
+
+    files = result.files
+    assert "example.txt" in files
+    assert files["example.txt"]["size"] == 0
+
+    # TODO implement out related to cwl.output.json
     # assert len(out["testing_result"]) == 1
     # assert out["testing_result"]["size"] == 0
     # assert out["testing_result"]["basename"] == "example.txt"
 
 
 def test_workflow():
-    out = arvados_run(
+    result = arvados_run(
         TESTING_PROJECT,
         "./tests/cwl_workflows/test_workflow.cwl",
         {"name": "workflow_example.txt"},
     )
+    assert "workflow_example.txt" in result.files
+    assert result.files["workflow_example.txt"]["size"] == 0
+
+    # TODO implement out related to cwl.output.json
     # assert len(out["testing_results"]) == 3
     # assert out["testing_results"][0]["size"] == 0
     # assert out["testing_results"][0]["basename"] == "workflow_example.txt"

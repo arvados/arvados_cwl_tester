@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache as memoized
 
 from arvados_cwl_tester.client import ArvadosClient
 from arvados_cwl_tester.cwl_runner import run_cwl_arvados
@@ -73,26 +74,7 @@ def check_if_project_is_completed(process: Process, test_name: str):
     return False
 
 
-def create_outputs_dict(process: Process) -> dict:
-    """
-    Create dictionary with outputs from process
-    Arguments:
-        process: class Process
-    Returns:
-        Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location''
-    """
-    client = ArvadosClient()
-    collection = client.get_collection(process.output_uuid)
-    data_hash = collection.portable_data_hash
 
-    outputs = {}
-    for file in collection.reader.all_files():
-        outputs[file.name()] = {
-            "size": file.size(),
-            "basename": file.name(),
-            "location": f"{data_hash}/{file.name()}",
-        }
-    return outputs
 
 
 def get_current_pytest_name() -> str:
@@ -107,9 +89,51 @@ def get_current_pytest_name() -> str:
     return os.environ["PYTEST_CURRENT_TEST"].split(":")[-1].split(" ")[0]
 
 
-def arvados_run(
-    target_project: str, cwl_path: str, inputs_dictionary: dict = None,
-) -> Process:
+
+class Result:
+
+    def __init__(self, process: Process):
+        self.client = ArvadosClient()
+        self.process = process
+
+    @property
+    @memoized()
+    def files(self) -> dict:
+        """
+        Create dictionary with outputs from process
+        Arguments:
+            process: class Process
+        Returns:
+            Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location''
+        """
+        collection = self.client.get_collection(self.process.output_uuid)
+        data_hash = collection.portable_data_hash
+
+        outputs = {}
+        for file in collection.reader.all_files():
+            outputs[file.name()] = {
+                "size": file.size(),
+                "basename": file.name(),
+                "location": f"{data_hash}/{file.name()}",
+            }
+        return outputs
+
+
+def arvados_dir(name: str) -> dict:
+    return {"class": "Directory", "path": name}
+
+
+def arvados_file(name: str, *secondary_files: list) -> dict:
+    return {
+        "class": "File",
+        "path": name,
+        "secondaryFiles": [
+            {"class": "File", "path": secondary_file}
+            for secondary_file in secondary_files
+        ],
+    }
+
+def arvados_run(target_project: str, cwl_path: str, inputs_dictionary: dict = None) -> Process:
     """
     Run process, return process object (class Process)
     Check if project is finished, check if project is completed.
@@ -134,19 +158,4 @@ def arvados_run(
     assert check_if_process_is_finished(process, new_created_project.name)
     assert check_if_project_is_completed(process, new_created_project.name)
 
-    return create_outputs_dict(process)
-
-
-def arvados_dir(name: str) -> dict:
-    return {"class": "Directory", "path": name}
-
-
-def arvados_file(name: str, *secondary_files: list) -> dict:
-    return {
-        "class": "File",
-        "path": name,
-        "secondaryFiles": [
-            {"class": "File", "path": secondary_file}
-            for secondary_file in secondary_files
-        ],
-    }
+    return Result(process)

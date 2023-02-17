@@ -28,17 +28,15 @@ Define all tests you need in `test_<your_name>.py` file. Here you can see an exa
 from arvados_cwl_tester import *
 
 def test_single_step():
-    output = arvados_run(
+    result = arvados_run(
         UUID["ardev"],
         "./components/single_step/single_step.cwl",
         {
             "name": "example.txt"
         }
     )
-
-    assert len(out["testing_result"]) == 1
-    assert out["testing_result"]["size"] > 0
-    assert out["testing_result"]["basename"] == "example.txt"
+    assert "example.txt" in result.files
+    assert result.files["example.txt"]["size"] == 0
 ```
 
 ### Execute the test
@@ -67,7 +65,8 @@ For example::
   "files": {
     "reference_genome": "keep:********************************6184/Homo_sapiens_assembly38.fasta",
     "reference_genome_secondary": "keep:********************************6183/Homo_sapiens_assembly38.fasta.fai",
-    "intervals": "keep:********************************6182/wgs_calling_regions.hg38.bed"
+    "intervals": "keep:********************************6182/wgs_calling_regions.hg38.bed",
+    "small_vcf": "./testing_data/small.vcf"
   }
 }
 ```
@@ -98,8 +97,6 @@ Run multiple tests in parallel - it will execute your tests as separated process
 ```bash
 pytest --workers 10 --tests-per-worker auto
 ```
-
-*workers* defines how many tetst will be executed in parallel
 
 ## Development of the library
 
