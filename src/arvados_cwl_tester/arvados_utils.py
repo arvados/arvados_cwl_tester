@@ -95,8 +95,20 @@ def create_outputs_dict(process: Process) -> dict:
     return outputs
 
 
+def get_current_pytest_name() -> str:
+    """
+    Get current pytest name
+    Returns:
+        str, current pytest name
+    """
+    if "PYTEST_CURRENT_TEST" not in os.environ:
+        raise Exception("arvados_run can be used only in pytest test")
+
+    return os.environ["PYTEST_CURRENT_TEST"].split(":")[-1].split(" ")[0]
+
+
 def arvados_run(
-    target_project: str, test_name: str, cwl_path: str, inputs_dictionary: dict = None
+    target_project: str, cwl_path: str, inputs_dictionary: dict = None,
 ) -> Process:
     """
     Run process, return process object (class Process)
@@ -111,7 +123,7 @@ def arvados_run(
         with following fields: 'size', 'basename' and 'location'
     """
 
-    new_created_project = create_new_project(target_project, test_name)
+    new_created_project = create_new_project(target_project, get_current_pytest_name())
 
     run_cwl_arvados(
         cwl_path, inputs_dictionary, new_created_project.uuid, new_created_project.name
@@ -119,26 +131,10 @@ def arvados_run(
 
     process = find_process_in_new_project(new_created_project.uuid)
 
-    assert check_if_process_is_finished(process, test_name)
-    assert check_if_project_is_completed(process, test_name)
+    assert check_if_process_is_finished(process, new_created_project.name)
+    assert check_if_project_is_completed(process, new_created_project.name)
 
     return create_outputs_dict(process)
-
-
-def get_current_pytest_name() -> str:
-    """
-    Get current pytest name
-    Returns:
-        str, current pytest name
-    """
-    if "PYTEST_CURRENT_TEST" not in os.environ:
-        raise Exception("arvados_run can be used only in pytest test")
-
-    return os.environ["PYTEST_CURRENT_TEST"].split(":")[-1].split(" ")[0]
-
-
-def arvados_test(project_uuid: str, cwl_path: str, inputs_dictionary: dict = None):
-    arvados_run(project_uuid, get_current_pytest_name(), cwl_path, inputs_dictionary)
 
 
 def arvados_dir(name: str) -> dict:

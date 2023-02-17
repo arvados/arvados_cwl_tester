@@ -7,11 +7,10 @@ from arvados_cwl_tester.helpers import create_input_yml
 from arvados_cwl_tester.helpers import Colors
 
 
-def run_cwl_arvados(cwl_path: str, inputs_dictionary, project_id, test_name):
+def run_cwl_arvados(cwl_path: str, inputs_dictionary: str, project_id, test_name):
     output = StringIO()
     error = StringIO()
     with create_input_yml(inputs_dictionary) as filename:
-        print(filename)
         print(Colors.OKBLUE + f"Process '{test_name}' is staring...")
         exit_code = arvados_cwl.main(
             [

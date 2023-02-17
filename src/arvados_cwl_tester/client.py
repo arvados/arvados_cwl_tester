@@ -51,10 +51,10 @@ class ArvadosClient:
         """
 
         git_username = get_git_username()
-        subproject_name = f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}"
+        subproject_name = f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S}"
 
         if git_username:
-            subproject_name.append(f" {git_username}")
+            subproject_name = f"{subproject_name} {git_username}"
 
         response = (
             self.api.groups()
