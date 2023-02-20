@@ -94,8 +94,6 @@ def test_single_step():
 
 Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time. 
 
-```bash
-pytest --workers 10 --tests-per-worker auto
 ```
 
 ## Development of the library
