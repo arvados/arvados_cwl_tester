@@ -1,0 +1,13 @@
+{
+    "projects": {
+        "ours": "arind-j7d0g-11cq990ue0u0cyg"
+    },
+    "my_testing_file": {
+        "class": "File",
+        "path": "test/data/my_testing_file.txt"
+    },
+    "my_testing_directory": {
+        "class": "Directory",
+        "path": "keep:cdscedscsaddrewe3843bh4n238chdbs"
+    }
+}

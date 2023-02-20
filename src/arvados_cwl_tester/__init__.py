@@ -1,17 +1,14 @@
 import os
 
-from arvados_cwl_tester.arvados_utils import *
+from arvados_cwl_tester.arvados_utils import arvados_run, arvados_project_uuid
 from arvados_cwl_tester.helpers import load_json
 
-# load variables from json file
-FILES = None
+# Load global variables from variables.json
+
 VARIABLES = None
-DIRECTORIES = None
-UUIDS = None
 
 if os.path.isfile("./test/variables.json"):
     VARIABLES = load_json("./test/variables.json")
-
-    FILES = VARIABLES["resources"]["files"]
-    UUIDS = VARIABLES["testing_projects"]
-    DIRECTORIES = VARIABLES["resources"]["directories"]
+    for key, value in load_json("./test/variables.json").items():
+        if key.upper() not in globals():
+            globals()[key.upper()] = value
