@@ -58,8 +58,8 @@ package(
     install_requires=[
         "pytest==7.1.2",
         "PyYAML==5.4.1",
-        "arvados-python-client==2.4.3",
-        "arvados-cwl-runner==2.4.3",
+        "arvados-python-client>=2.4.3,<=2.5",
+        "arvados-cwl-runner>=2.4.3,<=2.5",
         "pytest-parallel==0.1.1",
         "pytest==7.1.2",
     ],
