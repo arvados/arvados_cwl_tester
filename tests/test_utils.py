@@ -1,5 +1,5 @@
+from arvados_cwl_tester import arvados_run
 from arvados_cwl_tester.helpers import create_input_yml, load_file
-from arvados_cwl_tester import *
 
 TESTING_PROJECT = "arind-j7d0g-11cq990ue0u0cyg"
 
@@ -25,7 +25,8 @@ def test_create_input_yml():
         }
     )
 
-def test_create_input_yml_empty():
+
+def test_create_input_yml_empty_dict():
     create_input_yml({})
 
 

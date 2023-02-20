@@ -13,9 +13,7 @@ __all__ = [
     "save_file",
     "check_if_process_is_finished",
     "check_if_project_is_completed",
-    "check_if_collection_output_not_empty",
     "arvados_run",
-    "create_outputs_dict",
 ]
 
 
@@ -74,9 +72,6 @@ def check_if_project_is_completed(process: Process, test_name: str):
     return False
 
 
-
-
-
 def get_current_pytest_name() -> str:
     """
     Get current pytest name
@@ -89,9 +84,7 @@ def get_current_pytest_name() -> str:
     return os.environ["PYTEST_CURRENT_TEST"].split(":")[-1].split(" ")[0]
 
 
-
 class Result:
-
     def __init__(self, process: Process):
         self.client = ArvadosClient()
         self.process = process
@@ -133,13 +126,15 @@ def arvados_file(name: str, *secondary_files: list) -> dict:
         ],
     }
 
-def arvados_run(target_project: str, cwl_path: str, inputs_dictionary: dict = None) -> Process:
+
+def arvados_run(
+    target_project: str, cwl_path: str, inputs_dictionary: dict = None
+) -> Result:
     """
     Run process, return process object (class Process)
     Check if project is finished, check if project is completed.
     Arguments:
         target_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
-        test_name: str, name of the test
         cwl_path: str, path to cwl file that will be executed
         inputs_dictionary: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
     Returns:

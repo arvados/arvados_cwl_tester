@@ -1,5 +1,5 @@
-import os
 from io import StringIO
+from typing import Dict
 
 import arvados_cwl
 
@@ -7,7 +7,7 @@ from arvados_cwl_tester.helpers import create_input_yml
 from arvados_cwl_tester.helpers import Colors
 
 
-def run_cwl_arvados(cwl_path: str, inputs_dictionary: str, project_id, test_name):
+def run_cwl_arvados(cwl_path: str, inputs_dictionary: Dict, project_id, test_name):
     output = StringIO()
     error = StringIO()
     with create_input_yml(inputs_dictionary) as filename:
