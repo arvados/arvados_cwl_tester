@@ -1,8 +1,7 @@
-# Framework for testing Common Workflow Language on Arvados - arvados_cwl_tester
+# arvados_cwl_tester
+## Framework for testing Common Workflow Language on Arvados
 
-Note: This is not the final, official version
-
-Thank you for interest in arvados-cwl-tester framework. Please note that the current version is not the final, official version. While the frameworkk is usable , the work is still in progress. The official version will be released soon. 
+![Beta](https://img.shields.io/badge/Status-Beta-yellow)
 
 ## Introduction
 
@@ -10,11 +9,10 @@ Thank you for interest in arvados-cwl-tester framework. Please note that the cur
 
 **arvados_cwl_tester** API allows to write tests using python code and organize them in python script. 
 
-Every test runs process on Arvados in temporary subproject, that will be removed after some time automaticly that that will keep your testing space clean and tidy. 
+Every test runs process on Arvados in temporary subproject, that will be removed after some time automatically that will keep your testing space clean and tidy. 
 
 ## Installation
 
-### Setup environment
 
 ```
 pip install arvados_cwl_tester
@@ -27,47 +25,59 @@ Define all tests you need in `test_<your_name>.py` file. Here you can see an exa
 ```python
 from arvados_cwl_tester import *
 
+# Set global variable with project uuid where all your tests will be executed:
+arvados_project_uuid("arkau-*******************82")
+
+# Define a test
 def test_single_step():
     result = arvados_run(
-        UUID["ardev"],
         "./components/single_step/single_step.cwl",
         {
-            "name": "example.txt"
-        }
+            "name": "example"
+        },
     )
     assert "example.txt" in result.files
     assert result.files["example.txt"]["size"] == 0
+
 ```
 
 ### Execute the test
 
-Run in commandline:
+Run in command line:
 
 ```bash
 pytest -k single_step
 ```
 
+Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time: 
+
+```bash
+pytest --workers 10 --tests-per-worker auto
+```
+
 ### Variables
 
-You can create `./test/variables.json` file which will be used by arvados_cwl_tester to create global variables with matching names. You are free to name and organize your variables in any way you like. For example you can store project uuids, file, and directory handles, as so:
+You can create `./test/variables.json` file which will be used by arvados_cwl_tester to create global variables with matching names. You are free to name and organize your variables in any way you like. It solves problem with repetition of names if you have more testing scripts in your repository and all of them use some common variables. Content of `variables.json` will be imported as dictionary named 'VARIABLES' and uppercase names of main keys. For example you can store project uuids, files, and directories handles, as so:
 
-For example::
 ```json
 {
-  "projects": {
-    "ardev": "ardev-*******************81",
-    "arind": "arind-*******************92",
-    "arkau": "arkau-*******************82"
-  },
+  "arkau": "arkau-*******************82",
   "dirs": {
-    "fastq_collection": "keep:********************************6185"
+    "fastq_collection": {
+      "type": "Directory",
+      "path": "keep:********************************6185"
+    }
   },
-  "files": {
-    "reference_genome": "keep:********************************6184/Homo_sapiens_assembly38.fasta",
-    "reference_genome_secondary": "keep:********************************6183/Homo_sapiens_assembly38.fasta.fai",
-    "intervals": "keep:********************************6182/wgs_calling_regions.hg38.bed",
-    "small_vcf": "./testing_data/small.vcf"
-  }
+  "reference_genome": {
+    "class": "File",
+    "path": "keep:********************************6184/Homo_sapiens_assembly38.fasta",
+    "secondaryFiles": [
+      {
+        "class": "File",
+        "path": "keep:********************************6183/Homo_sapiens_assembly38.fasta.fai"
+      }
+    ]
+    }
 }
 ```
 
@@ -76,23 +86,28 @@ Then you can access them in following way:
 ```python
 from arvados_cwl_tester import *
 
-def test_single_step():
+arvados_project_uuid(VARIABLES["akau"])
+
+# using "VARIABLES" that is a dictionary
+def test_single_step_variables():
     out = arvados_run(
-      PROJECTS["akau"],
       "./my_cwl.cwl",
       {
-          "fastq_collection": arvados_dir(DIRS["fastq_collection"]),
-          "intervals": arvados_file(FILES["intervals"]),
-          "reference_genome": arvados_file(FILES["reference_genome"], FILES["reference_genome_secondary"])
+          "fastq_collection": VARIABLES["dirs"]["fastq_collection"],
+          "reference_genome": VARIABLES["reference_genome"],
       }
     )
 
-```
-
-### How to execute tests in parallel
-
-
-Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time. 
+# or uppercase key names from VARIABLES like:
+def test_single_step_key_names():
+    out = arvados_run(
+      "./my_cwl.cwl",
+      {
+          "fastq_collection": DIRS["fastq_collection"],
+          "reference_genome": REFERENCE_GENOME,
+          "gene_panel": GENE_PANEL
+      }
+    )
 
 ```
 
@@ -105,4 +120,5 @@ bash setup.sh
 source venv/bin/activate
 
 ```
+
 

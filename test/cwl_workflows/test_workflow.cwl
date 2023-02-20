@@ -1,10 +1,11 @@
-cwlVersion: v1.1
+cwlVersion: v1.2
 class: Workflow
 
 hints:
   DockerRequirement:
     dockerPull: ubuntu:18.04
   MultipleInputFeatureRequirement: {}
+  InlineJavascriptRequirement: {}
 
 inputs:
   name:
