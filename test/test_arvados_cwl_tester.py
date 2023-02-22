@@ -54,7 +54,7 @@ def test_variables_and_projects():
 
 
 def test_single_step_():
-    arvados_project_uuid(PROJECTS["ours"])
+    arvados_project_uuid(PROJECTS["playground"])
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
         { "name": "example" }
@@ -70,11 +70,11 @@ def test_single_step_():
     # assert outputs["testing_result"]["basename"] == "example.txt"
 
 
-def test_single_step_define_target_yourself():
+def test_step_define_target_yourself():
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
         {"name": "example"},
-        project_uuid=PROJECTS["ours"]
+        project_uuid=PROJECTS["playground"]
     )
 
     assert "example.txt" in result.files
@@ -82,7 +82,7 @@ def test_single_step_define_target_yourself():
 
 
 def test_workflow():
-    arvados_project_uuid(PROJECTS["ours"])
+    arvados_project_uuid(PROJECTS["playground"])
     result = arvados_run(
         "./test/cwl_workflows/test_workflow.cwl",
         {"name": "workflow_example"}
