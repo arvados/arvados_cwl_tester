@@ -30,7 +30,7 @@ def package(name, authors, **args):
 
 package(
     name="arvados_cwl_tester",
-    version="Beta",
+    version="0.1.0",
     description="Framework for testing Common Workflow Language on Arvados",
     keywords=[
         "cwl",
