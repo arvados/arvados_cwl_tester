@@ -41,6 +41,29 @@ def pwd(path_to_file):
     return os.path.dirname(os.path.abspath(path_to_file))
 
 
+def change_path_in_values(item_dict: dict) -> dict:
+    result = item_dict.copy()
+    if "path" in item_dict:
+        if not item_dict["path"].startswith("keep:"):
+            result["path"] = os.path.abspath(result["path"])
+    return result
+
+
+def change_local_paths_to_abs(inputs_dictionary: dict = None) -> dict:
+    result = inputs_dictionary.copy()
+    if inputs_dictionary:
+        for key, values in inputs_dictionary.items():
+            if isinstance(values, dict):
+                result[key] = change_path_in_values(result[key])
+            elif isinstance(values, list):
+                items = []
+                for item in range(0, len(values)):
+                    items.append(change_path_in_values(result[key][item]))
+                result[key] = items
+    print(result)
+    return result
+
+
 @contextlib.contextmanager
 def create_input_yml(inputs_dictionary: Dict = None):
     """
