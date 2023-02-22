@@ -1,28 +1,52 @@
 import os
-from functools import lru_cache as memoized
+from datetime import datetime
+from functools import lru_cache as memoized, lru_cache
+
+import arvados.errors
 
 from arvados_cwl_tester.client import ArvadosClient
 from arvados_cwl_tester.cwl_runner import run_cwl_arvados
-from arvados_cwl_tester.entities import Process, ProcessStatus
-from arvados_cwl_tester.helpers import Colors
+from arvados_cwl_tester.entities import Process, ProcessStatus, Project
+from arvados_cwl_tester.helpers import Colors, get_username
 
 DEFAULT_PROJECT_UUID = None
 
 __all__ = [
-    "create_new_project",
+    "get_or_create_project",
     "find_process_in_new_project",
     "save_file",
     "check_if_process_is_finished",
     "check_if_project_is_completed",
     "arvados_run",
+    "arvados_project_uuid",
 ]
 
 
-def create_new_project(target: str, test_name: str):
-    # Create project in target
+@lru_cache
+def get_or_create_project(target: str) -> Project:
+    """
+    Create one project per day for all user tests.
+    """
+    username = get_username()
+    subproject_name = f"arvados_cwl_tester {username} {datetime.now():%Y-%m-%d}"
     client = ArvadosClient()
-    project = client.create_project(target, test_name)
-    print(Colors.BOLD + f"Project {test_name} was created succesfully: {project.uuid}")
+    project = client.find_project_by_name(target, subproject_name)
+    if project:
+        return project
+    # Create project in target
+    try:
+        project = client.create_project(target, subproject_name)
+    except arvados.errors.ApiError as e:
+        if e.resp.status == 422:
+            # Project was already created in a concurrent test, return existing project
+            project = client.find_project_by_name(target, subproject_name)
+            if project:
+                return project
+        raise
+    print(
+        Colors.BOLD
+        + f"Project {subproject_name} was created succesfully: {project.uuid}"
+    )
     return project
 
 
@@ -113,9 +137,7 @@ class Result:
         return outputs
 
 
-def arvados_run(
-    cwl_path: str, inputs: dict, project_uuid: str=None
-) -> Result:
+def arvados_run(cwl_path: str, inputs: dict, project_uuid: str = None) -> Result:
     """
     Run process, return process object (class Process)
     Check if project is finished, check if project is completed.
@@ -133,10 +155,10 @@ def arvados_run(
     
     project = project_uuid or DEFAULT_PROJECT_UUID
 
-    new_created_project = create_new_project(project, get_current_pytest_name())
+    new_created_project = get_or_create_project(project)
 
     run_cwl_arvados(
-        cwl_path, inputs, new_created_project.uuid, new_created_project.name
+        cwl_path, inputs, new_created_project.uuid, get_current_pytest_name()
     )
 
     process = find_process_in_new_project(new_created_project.uuid)
@@ -145,6 +167,7 @@ def arvados_run(
     assert check_if_project_is_completed(process, new_created_project.name)
 
     return Result(process)
+
 
 def arvados_project_uuid(uuid: str):
     global DEFAULT_PROJECT_UUID

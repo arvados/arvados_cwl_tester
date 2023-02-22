@@ -9,7 +9,7 @@
 
 **arvados_cwl_tester** API allows to write tests using python code and organize them in python script. 
 
-Every test runs process on Arvados in temporary subproject, that will be removed after some time automatically that will keep your testing space clean and tidy. 
+Every test runs process on Arvados in temporary subproject which will be removed after one week automatically. When you execute first test during specific day new project is created authomaticly and all tests executed during this day will be placed there. That will keep your testing space clean and tidy. 
 
 ## Installation
 
@@ -22,7 +22,7 @@ source venv/bin/activate
 pip install .
 ```
 
-### Write your first test
+## Write your first test
 
 Define all tests you need in `test_<your_name>.py` file. Here you can see an example how this file can look like:
 
@@ -45,7 +45,7 @@ def test_single_step():
 
 ```
 
-### Execute the test
+## Execute the test
 
 Run in command line:
 
@@ -59,7 +59,7 @@ Run multiple tests in parallel - it will execute your tests as separated process
 pytest --workers 10 --tests-per-worker auto
 ```
 
-### Variables
+## Variables
 
 You can create `./test/variables.json` file which will be used by arvados_cwl_tester to create global variables with matching names. You are free to name and organize your variables in any way you like. It solves problem with repetition of names if you have more testing scripts in your repository and all of them use some common variables. Content of `variables.json` will be imported as dictionary named 'VARIABLES' and uppercase names of main keys. For example you can store project uuids, files, and directories handles, as so:
 
@@ -114,6 +114,10 @@ def test_single_step_key_names():
     )
 
 ```
+
+## Playground
+
+After installation you can play with example cwl project with already implemented tests: 
 
 ## Development of the library
 

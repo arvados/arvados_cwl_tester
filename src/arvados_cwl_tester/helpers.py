@@ -1,13 +1,13 @@
 import contextlib
+from functools import lru_cache
 from typing import Dict
 
 import yaml
 import os
 import json
 import tempfile
-import subprocess
 
-GIT_USERNAME = None
+from arvados_cwl_tester.client import ArvadosClient
 
 
 class Colors:
@@ -56,14 +56,8 @@ def create_dict_for_input_file(name: str, resources) -> dict:
     return {"class": "File", "path": os.path.join(resources, name)}
 
 
-def get_git_username():
-    global GIT_USERNAME
-    if GIT_USERNAME is not None:
-        return GIT_USERNAME
-
-    try:
-        output = subprocess.check_output(["git", "config", "user.name"])
-        GIT_USERNAME = output.decode("utf-8").strip()
-        return GIT_USERNAME
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
+@lru_cache
+def get_username():
+    client = ArvadosClient()
+    user = client.get_current_user()
+    return user["full_name"] or user["username"]
