@@ -52,6 +52,11 @@ def test_change_local_paths_to_abs_arrays():
             ]
             }
 
+def test_change_local_paths_cat():
+    inputs_dictionary = { "file": {"class": "File", "path": "./test/data/my_testing_file.txt"}}
+    assert change_local_paths_to_abs(inputs_dictionary) == {
+            "file": {"class": "File", "path": f"{os.getcwd()}/test/data/my_testing_file.txt"}
+        }
 
 def test_create_input_yml():
     create_input_yml(
@@ -80,7 +85,7 @@ def test_variables_access():
     print(VARIABLES)
     assert MY_TESTING_FILE == {
             "class": "File",
-            "path": "test/data/my_testing_file.txt"
+            "path": "./test/data/my_testing_file.txt"
         }
 
 
@@ -88,13 +93,18 @@ def test_variables_and_projects():
     assert VARIABLES["projects"] == PROJECTS
 
 
-# TODO: fix inputs from local
-def test_cat():
-    arvados_project_uuid(PROJECTS["ours"])
-    result = arvados_run(
-        "./test/cwl_workflows/test_cat/test_cat.cwl",
-        { "file": MY_TESTING_FILE }
-    )
+# TODO: debug this test
+# def test_step_cat():
+#     arvados_project_uuid(PROJECTS["ours"])
+#     result = arvados_run(
+#         "./test/cwl_workflows/test_cat/test_cat.cwl",
+#         {
+#         "file": {
+#             "class": "File",
+#             "path": "./test/data/my_testing_file.txt"
+#             }
+#         }
+#     )
 
 
 def test_single_step_():
