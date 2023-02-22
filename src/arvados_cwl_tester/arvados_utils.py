@@ -158,7 +158,7 @@ def arvados_run(cwl_path: str, inputs: dict, project_uuid: str = None) -> Result
     project = project_uuid or DEFAULT_PROJECT_UUID
 
     new_created_project = get_or_create_project(project)
-    test_name = f"{get_current_pytest_name()} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}"
+    test_name = f"{get_current_pytest_name()} {datetime.now():%Y-%m-%d %H:%M:%S}"
     run_cwl_arvados(cwl_path, inputs, new_created_project.uuid, test_name)
 
     process = find_process_in_new_project(new_created_project.uuid, test_name)
