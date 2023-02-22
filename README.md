@@ -15,7 +15,11 @@ Every test runs process on Arvados in temporary subproject, that will be removed
 
 
 ```
-pip install arvados_cwl_tester
+git clone git@github.com:arvados/arvados_cwl_tester.git
+cd arvados_cwl_tester
+virtualenv venv
+source venv/bin/activate
+pip install .
 ```
 
 ### Write your first test
