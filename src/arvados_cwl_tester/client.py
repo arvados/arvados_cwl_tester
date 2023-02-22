@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, List
 
 import arvados
 from arvados.errors import ApiError
@@ -64,22 +64,28 @@ class ArvadosClient:
         )
         return Project.from_dict(**response)
 
-    def list_container_requests_in_project(self, parent_uuid: str):
+    def list_container_requests(self, filters: List):
+        if not filters:
+            filters = []
         return arvados.util.keyset_list_all(
             self.api.container_requests().list,
-            filters=[["owner_uuid", "=", parent_uuid]],
+            filters=filters,
         )
 
-    def get_container_request_by_parent_uuid(self, parent_uuid: str) -> Process:
+    def get_container_request_by_parent_uuid(
+        self, parent_uuid: str, test_name: str
+    ) -> Process:
         """
         Return first container request from parent project. Raise exception if empty
-        :param parent_uuid:
-        :return:
         """
-        requests = list(self.list_container_requests_in_project(parent_uuid))
+        requests = list(
+            self.list_container_requests(
+                filters=[["owner_uuid", "=", parent_uuid], ["name", "=", test_name]]
+            )
+        )
         if not requests:
             raise ProcessNotFoundError(
-                f"No processes are found in {parent_uuid} project"
+                f"No processes are found in {parent_uuid} with name {test_name} project"
             )
         if len(requests) > 1:
             logging.warning(f"Multiple processes found in {parent_uuid}")
@@ -114,8 +120,7 @@ class ArvadosClient:
 
     def find_project_by_name(self, parent_project: str, name: str) -> Project:
         response = (
-            self.api
-            .groups()
+            self.api.groups()
             .list(filters=[["owner_uuid", "=", parent_project], ["name", "=", name]])
             .execute()["items"]
         )

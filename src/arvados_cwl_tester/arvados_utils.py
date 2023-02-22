@@ -50,9 +50,9 @@ def get_or_create_project(target: str) -> Project:
     return project
 
 
-def find_process_in_new_project(project_uuid: str):
+def find_process_in_new_project(project_uuid: str, test_name: str):
     client = ArvadosClient()
-    return client.get_container_request_by_parent_uuid(project_uuid)
+    return client.get_container_request_by_parent_uuid(project_uuid, test_name)
 
 
 def save_file(collection_uuid: str, filename: str, output_filename: str = None):
@@ -151,17 +151,17 @@ def arvados_run(cwl_path: str, inputs: dict, project_uuid: str = None) -> Result
     """
 
     if project_uuid is None and DEFAULT_PROJECT_UUID is None:
-        raise Exception("You need to use set_project_uuid function to set default project")
-    
+        raise Exception(
+            "You need to use set_project_uuid function to set default project"
+        )
+
     project = project_uuid or DEFAULT_PROJECT_UUID
 
     new_created_project = get_or_create_project(project)
+    test_name = f"{get_current_pytest_name()} {datetime.now():%Y-%m-%d %H:%M:%S%f%z}"
+    run_cwl_arvados(cwl_path, inputs, new_created_project.uuid, test_name)
 
-    run_cwl_arvados(
-        cwl_path, inputs, new_created_project.uuid, get_current_pytest_name()
-    )
-
-    process = find_process_in_new_project(new_created_project.uuid)
+    process = find_process_in_new_project(new_created_project.uuid, test_name)
 
     assert check_if_process_is_finished(process, new_created_project.name)
     assert check_if_project_is_completed(process, new_created_project.name)
