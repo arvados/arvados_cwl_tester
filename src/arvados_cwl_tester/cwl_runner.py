@@ -14,17 +14,17 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary: Dict, project_id, test_nam
     with create_input_yml(inputs_dictionary) as filename:
         print(Colors.OKBLUE + f"Process '{test_name}' is starting...")
         args = [
-                "--basedir",
-                ".",
-                "--debug",
-                "--name",
-                f"{test_name}",
-                f"--project-uuid={project_id}",
-                "--intermediate-output-ttl",
-                "604800",
-                cwl_path,
-                filename,
-            ]
+            "--basedir",
+            ".",
+            "--debug",
+            "--name",
+            f"{test_name}",
+            f"--project-uuid={project_id}",
+            "--intermediate-output-ttl",
+            "604800",
+            cwl_path,
+            filename,
+        ]
         print(args)
         exit_code = arvados_cwl.main(
             args,

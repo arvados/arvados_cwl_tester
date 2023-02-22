@@ -1,6 +1,6 @@
 import logging
-import os
 from datetime import datetime, timedelta
+from typing import Dict
 
 import arvados
 from arvados.errors import ApiError
@@ -11,8 +11,6 @@ from arvados_cwl_tester.exceptions import (
     ProcessNotFoundError,
     CollectionNotFoundError,
 )
-
-from arvados_cwl_tester.helpers import get_git_username
 
 
 class ArvadosClient:
@@ -43,26 +41,20 @@ class ArvadosClient:
                 raise CollectionNotFoundError(f"No collection with uuid {uuid}")
             raise
 
-    def create_project(self, parent_uuid: str, test_name: str) -> Project:
+    def create_project(self, parent_uuid: str, name: str) -> Project:
         """
         Create test project in target project. Trash it after one week.
         :param parent_uuid: Target project uuid
+        :param name: Project name
         :return: dictionary with project data
         """
-
-        git_username = get_git_username()
-        subproject_name = f"{test_name} {datetime.now():%Y-%m-%d %H:%M:%S}"
-
-        if git_username:
-            subproject_name = f"{subproject_name} {git_username}"
-
         response = (
             self.api.groups()
             .create(
                 body={
                     "group_class": "project",
                     "owner_uuid": parent_uuid,
-                    "name": subproject_name,
+                    "name": name,
                     "trash_at": (datetime.now() + timedelta(days=7)).strftime(
                         "%Y-%m-%d"
                     ),
@@ -116,3 +108,17 @@ class ArvadosClient:
             if e.resp.status == 404:
                 raise ProcessNotFoundError(f"No container with uuid {uuid}")
             raise
+
+    def get_current_user(self) -> Dict:
+        return self.api.users().current().execute()
+
+    def find_project_by_name(self, parent_project: str, name: str) -> Project:
+        response = (
+            self.api
+            .groups()
+            .list(filters=[["owner_uuid", "=", parent_project], ["name", "=", name]])
+            .execute()["items"]
+        )
+        if response:
+            return Project.from_dict(**response[0])
+        return None
