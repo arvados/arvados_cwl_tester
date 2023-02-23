@@ -128,7 +128,6 @@ class Result:
             Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location''
         """
 
-
         outputs = {}
         for file in self.collection.reader.all_files():
             outputs[file.name()] = {
