@@ -31,7 +31,6 @@ def test_change_local_paths_to_abs_dict():
     }
 
 def test_change_local_paths_to_abs_arrays():
-    
     assert change_local_paths_to_abs({
         "directories": [
             {"class": "Directory", "path": "./test/data"},
@@ -83,10 +82,7 @@ def test_create_input_yml_empty():
 
 def test_variables_access():
     print(VARIABLES)
-    assert MY_TESTING_FILE == {
-            "class": "File",
-            "path": "./test/data/my_testing_file.txt"
-        }
+    assert MY_TESTING_FILE == {"class": "File", "path": "test/data/my_testing_file.txt"}
 
 
 def test_variables_and_projects():
@@ -94,24 +90,24 @@ def test_variables_and_projects():
 
 
 # TODO: debug this test
-# def test_step_cat():
-#     arvados_project_uuid(PROJECTS["ours"])
-#     result = arvados_run(
-#         "./test/cwl_workflows/test_cat/test_cat.cwl",
-#         {
-#         "file": {
-#             "class": "File",
-#             "path": "./test/data/my_testing_file.txt"
-#             }
-#         }
-#     )
+def test_step_cat():
+    arvados_project_uuid(PROJECTS["ours"])
+    result = arvados_run(
+        "./test/cwl_workflows/test_cat/test_cat.cwl",
+        {
+        "file": {
+            "class": "File",
+            "path": "./test/data/my_testing_file.txt"
+            }
+        }
+    )
 
 
 def test_single_step_():
     arvados_project_uuid(PROJECTS["ours"])
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
-        { "name": "example" }
+        {"name": "example"},
     )
 
     assert "example.txt" in result.files
@@ -128,7 +124,7 @@ def test_single_step_define_target_yourself():
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
         {"name": "example"},
-        project_uuid=PROJECTS["ours"]
+        project_uuid=PROJECTS["ours"],
     )
 
     assert "example.txt" in result.files
@@ -139,8 +135,7 @@ def test_single_step_define_target_yourself():
 def test_workflow():
     arvados_project_uuid(PROJECTS["ours"])
     result = arvados_run(
-        "./test/cwl_workflows/test_workflow.cwl",
-        {"name": "workflow_example"}
+        "./test/cwl_workflows/test_workflow.cwl", {"name": "workflow_example"}
     )
 
     assert "workflow_example.txt" in result.files

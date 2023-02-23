@@ -177,8 +177,8 @@ def arvados_run(cwl_path: str, inputs: dict, project_uuid: str = None) -> Result
 
     process = find_process_in_new_project(new_created_project.uuid, test_name)
 
-    assert check_if_process_is_finished(process, new_created_project.name)
-    assert check_if_project_is_completed(process, new_created_project.name)
+    assert check_if_process_is_finished(process, process.name)
+    assert check_if_project_is_completed(process, process.name)
 
     return Result(process)
 
