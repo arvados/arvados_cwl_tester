@@ -125,7 +125,8 @@ class Result:
         Arguments:
             process: class Process
         Returns:
-            Dictionary containing outputs filenames as keys and dictionaries as values, with following fields: 'size', 'basename' and 'location''
+            Dictionary containing outputs filenames as keys and dictionaries as values, with following fields:
+            'size', 'basename' and 'location''
         """
 
         outputs = {}
@@ -156,11 +157,10 @@ def arvados_run(cwl_path: str, inputs: dict, project_uuid: str = None) -> Result
     Check if project is finished, check if project is completed.
     Arguments:
         cwl_path: str, path to cwl file that will be executed
-        inputs: dict, containing cwl inputs. This is optional, because sometimes cwl doesn't require input.
-        arvados_project: str, uuid of project when process will be executed. Example: arkau-ecds9343fdscdsdcd
+        inputs: dict, containing cwl inputs.
+        arvados_project (optional): str, uuid of project when process will be executed. Example: pirca-ecds9343fdscdsdcd
     Returns:
-        dict, containing outputs filenames as keys and dictionaries as values,
-        with following fields: 'size', 'basename' and 'location'
+        class: Process
     """
 
     if project_uuid is None and DEFAULT_PROJECT_UUID is None:
