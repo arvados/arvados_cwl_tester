@@ -17,8 +17,6 @@ Every test runs process on Arvados in temporary subproject which will be removed
 ```
 git clone git@github.com:arvados/arvados_cwl_tester.git
 cd arvados_cwl_tester
-virtualenv venv
-source venv/bin/activate
 pip install .
 ```
 
@@ -117,7 +115,9 @@ def test_single_step_key_names():
 
 ## Playground
 
-After installation you can play with example cwl project with already implemented tests: 
+After installation you can play with example cwl project with already implemented tests:
+
+https://github.com/monigenomi/arvados-cwl-tester-playground
 
 ## Development of the library
 
