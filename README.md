@@ -72,7 +72,7 @@ You can create `./test/variables.json` file which will be used by arvados_cwl_te
 
 ```json
 {
-  "arkau": "arkau-*******************82",
+  "prica": "prica-*******************82",
   "dirs": {
     "fastq_collection": {
       "type": "Directory",
