@@ -1,13 +1,14 @@
-# arvados_cwl_tester
+# Arvados CWL Tester
 ## Framework for testing Common Workflow Language on Arvados
 
 ![Beta](https://img.shields.io/badge/Status-Beta-yellow)
 
+The **Arvados CWL Tester** is an open-source testing framework that lets you write and manage reproducible e2e CWL tests in Python and execute on Arvados. Arvados is an open source platform for managing and processing large biomedical data (more information you can find [here](https://arvados.org/)).
+The framework supports parallel execution of multiple e2e tests using pytest. 
+
 ## Introduction
 
-**arvados_cwl_tester** framework is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL CommandLineTools and Workflows and run them in parallel on Arvados, using `pytest`.
-
-**arvados_cwl_tester** API allows to write tests using python code and organize them in python script. 
+**Arvados CWL Tester** API allows to write tests using python code and organize them in python script. 
 
 Every test runs process on Arvados in temporary subproject which will be removed after one week automatically. When you execute first test during specific day new project is created authomaticly and all tests executed during this day will be placed there. That will keep your testing space clean and tidy. 
 
@@ -28,7 +29,7 @@ Define all tests you need in `test_<your_name>.py` file. Here you can see an exa
 from arvados_cwl_tester import *
 
 # Set global variable with project uuid where all your tests will be executed:
-arvados_project_uuid("arkau-*******************82")
+arvados_project_uuid("pirca-*******************82")
 
 # Define a test
 def test_single_step():
@@ -40,6 +41,7 @@ def test_single_step():
     )
     assert "example.txt" in result.files
     assert result.files["example.txt"]["size"] == 0
+    assert result.command == ["touch", "example.txt"]
 
 ```
 
@@ -48,13 +50,13 @@ def test_single_step():
 Run in command line:
 
 ```bash
-pytest -k single_step
+$ pytest -k single_step
 ```
 
 Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time: 
 
 ```bash
-pytest --workers 10 --tests-per-worker auto
+$ pytest --workers 10 --tests-per-worker auto
 ```
 
 ## Variables
@@ -115,18 +117,24 @@ def test_single_step_key_names():
 
 ## Playground
 
-After installation you can play with example cwl project with already implemented tests:
+[Arvados CWL Tester Playground](https://github.com/monigenomi/arvados-cwl-tester-playground) is a sample project to help you learn how to use **Arvados CWL Tester**. You can use this project as a starting point to create your own tests for your own CWL workflows. 
 
-https://github.com/monigenomi/arvados-cwl-tester-playground
+## Contributing
 
-## Development of the library
+We welcome contributions to the Arvados CWL Tester project! If you find any issues or have suggestions for improvements please create a new issue or pull request. 
 
-To activate development environment:
 
+To activate development environment run a command:
 ```bash
-bash setup.sh
-source venv/bin/activate
-
+$ bash setup.sh
+$ source venv/bin/activate
 ```
 
+## Authors
 
+**Monika Krzyzanowska** [monigenomi](https://github.com/monigenomi), e-mail: monigenomi@gmail.com
+**Joana Butkiewicz** [joanna-butkiewicz]https://github.com/joanna-butkiewicz
+
+## Licensing
+
+This project is licensed under Apache 2.0
