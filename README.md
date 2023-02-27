@@ -1,15 +1,20 @@
-# arvados_cwl_tester
-## Framework for testing Common Workflow Language on Arvados
+# Arvados CWL Tester 
 
 ![Beta](https://img.shields.io/badge/Status-Beta-yellow)
 
-## Introduction
+**Framework for testing Common Workflow Language on Arvados**
 
-**arvados_cwl_tester** framework is dedicated to people, that develop pipelines in CWL and run them on Arvados. It allows to create easy and reproducible tests for CWL CommandLineTools and Workflows and run them in parallel on Arvados, using `pytest`.
+<img src="https://www.linkpicture.com/q/tester_2.png" alt="logo" width="200"/>
 
-**arvados_cwl_tester** API allows to write tests using python code and organize them in python script. 
+**Arvados CWL Tester** is an open-source testing framework that allows you to write and manage reproducible e2e CWL tests and execute them on Arvados (more information about Arvados can be find [here](https://arvados.org/)). 
+It supports parallel execution of multiple tests.
 
-Every test runs process on Arvados in temporary subproject which will be removed after one week automatically. When you execute first test during specific day new project is created authomaticly and all tests executed during this day will be placed there. That will keep your testing space clean and tidy. 
+## Introduction 
+
+**Arvados CWL Tester** API allows you to write tests in Python and organize them in Python scripts. It uses pytest library for tests execution. 
+
+Additionally Arvados CWL Tester allows to keep testing space well organized. Execution of the test creates separate Project on Arvados per day and per Arvados user. All tests executed in the same day and by the same user starts a process inside this Project. Projects are then automatically removed after one week which helps to keep your testing space clean and tidy. 
+
 
 ## Installation
 
@@ -22,15 +27,15 @@ pip install .
 
 ## Write your first test
 
-Define all tests you need in `test_<your_name>.py` file. Here you can see an example how this file can look like:
+You can define all your tests in single `test_<your_name>.py` file. Here you can see an example of how this file can look like:
 
 ```python
 from arvados_cwl_tester import *
 
 # Set global variable with project uuid where all your tests will be executed:
-arvados_project_uuid("arkau-*******************82")
+arvados_project_uuid("pirca-*******************82")
 
-# Define a test
+# Define your first test for a single CWL step (CommanLineTool)
 def test_single_step():
     result = arvados_run(
         "./components/single_step/single_step.cwl",
@@ -40,30 +45,31 @@ def test_single_step():
     )
     assert "example.txt" in result.files
     assert result.files["example.txt"]["size"] == 0
+    assert result.command == ["touch", "example.txt"]
 
 ```
 
 ## Execute the test
 
-Run in command line:
+Run following command in Command Line:
 
 ```bash
-pytest -k single_step
+$ pytest -k single_step
 ```
 
-Run multiple tests in parallel - it will execute your tests as separated processes on arvados and you will save time: 
+Run **multiple tests in parallel** - it will execute your tests as separated processes on Arvados: 
 
 ```bash
-pytest --workers 10 --tests-per-worker auto
+$ pytest --workers 10 --tests-per-worker auto
 ```
 
-## Variables
+## CWL inputs imported as variables
 
-You can create `./test/variables.json` file which will be used by arvados_cwl_tester to create global variables with matching names. You are free to name and organize your variables in any way you like. It solves problem with repetition of names if you have more testing scripts in your repository and all of them use some common variables. Content of `variables.json` will be imported as dictionary named 'VARIABLES' and uppercase names of main keys. For example you can store project uuids, files, and directories handles, as so:
+There is an optional feature implemented in this framework that helps to organize definitions of CWL inputs, defining them in single place. You can create `./test/variables.json` file which will be used by arvados_cwl_tester to create global variables with matching names. You are free to name and organize your variables in any way you like. It solves problem with repetition of names if you have more testing scripts in your repository and all of them use some common variables. Content of `variables.json` can be imported as dictionary named 'VARIABLES' and uppercase names of main keys. For example you can store project uuids, files, and directories handles, as so:
 
 ```json
 {
-  "arkau": "arkau-*******************82",
+  "pirca": "pirca-*******************82",
   "dirs": {
     "fastq_collection": {
       "type": "Directory",
@@ -113,20 +119,31 @@ def test_single_step_key_names():
 
 ```
 
-## Playground
+## Playground - try it for yourself
 
-After installation you can play with example cwl project with already implemented tests:
+[Arvados CWL Tester Playground](https://github.com/monigenomi/arvados-cwl-tester-playground) is a sample project to help you learn how to use **Arvados CWL Tester**. You can use this project as a starting point to create your own tests for your own CWL Workflows. 
 
-https://github.com/monigenomi/arvados-cwl-tester-playground
+## Contributing
 
-## Development of the library
+We welcome contributions to the Arvados CWL Tester project! If you find any issues or have suggestions for improvements please create a new issue or pull request. 
 
-To activate development environment:
 
+To activate development environment run following command in Command Line:
 ```bash
-bash setup.sh
-source venv/bin/activate
-
+$ bash setup.sh
+$ source venv/bin/activate
 ```
 
+## Authors
 
+**Monika Krzyzanowska**
+[@monigenomi](https://github.com/monigenomi)
+e-mail: monigenomi@gmail.com
+
+
+**Joana Butkiewicz**
+[@joanna-butkiewicz](https://github.com/joanna-butkiewicz)
+
+## Licensing
+
+This project is licensed under Apache 2.0
