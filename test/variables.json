@@ -1,6 +1,7 @@
 {
     "projects": {
-        "ours": "arind-j7d0g-11cq990ue0u0cyg"
+        "ours": "arind-j7d0g-11cq990ue0u0cyg",
+        "playground": "pirca-j7d0g-b05ocf2z1ak34yx"
     },
     "my_testing_file": {
         "class": "File",

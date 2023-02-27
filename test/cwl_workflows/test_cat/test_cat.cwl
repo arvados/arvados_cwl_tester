@@ -11,7 +11,8 @@ inputs:
   file:
     type: File
 
-baseCommand: [cat, file]
+baseCommand: [cat]
+arguments: [$(inputs.file)]
 
 outputs:
   an_output_name:

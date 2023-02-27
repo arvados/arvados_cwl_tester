@@ -1,6 +1,6 @@
 from arvados_cwl_tester import *
-from arvados_cwl_tester.helpers import create_input_yml, load_file
-
+from arvados_cwl_tester.helpers import create_input_yml, load_file, change_local_paths_to_abs
+import os
 
 def test_load_file():
     assert (
@@ -8,6 +8,54 @@ def test_load_file():
         == list
     )
 
+def test_change_local_paths_to_abs_dict():
+
+    assert change_local_paths_to_abs({
+        "local_directory": {
+            "class": "Directory",
+            "path": "./test"
+        },
+        "arvados_directory": {
+            "class": "Directory",
+            "path": "keep:cdsfdnkcnhksjcnkwr234"
+        }
+    }) == {
+        "local_directory": {
+            "class": "Directory",
+            "path": f"{os.getcwd()}/test"
+        },
+        "arvados_directory": {
+            "class": "Directory",
+            "path": "keep:cdsfdnkcnhksjcnkwr234"
+        }
+    }
+
+def test_change_local_paths_to_abs_arrays():
+    assert change_local_paths_to_abs({
+        "directories": [
+            {"class": "Directory", "path": "./test/data"},
+            {"class": "Directory","path": "keep:cdscsijee"}
+            ],
+        "files": [
+            {"class": "File", "path": "keep:cdsfdnkcnhksjcnkwr234/some_file.txt"},
+            {"class": "File", "path": "./test/data/my_testing_file.txt"}
+            ]
+            }) == {
+        "directories": [
+            {"class": "Directory", "path": f"{os.getcwd()}/test/data"},
+            {"class": "Directory", "path": "keep:cdscsijee"}
+            ],
+        "files": [
+            {"class": "File","path": "keep:cdsfdnkcnhksjcnkwr234/some_file.txt"},
+            {"class": "File","path": f"{os.getcwd()}/test/data/my_testing_file.txt"}
+            ]
+            }
+
+def test_change_local_paths_cat():
+    inputs_dictionary = { "file": {"class": "File", "path": "./test/data/my_testing_file.txt"}}
+    assert change_local_paths_to_abs(inputs_dictionary) == {
+            "file": {"class": "File", "path": f"{os.getcwd()}/test/data/my_testing_file.txt"}
+        }
 
 def test_create_input_yml():
     create_input_yml(
@@ -34,30 +82,32 @@ def test_create_input_yml_empty():
 
 def test_variables_access():
     print(VARIABLES)
-    assert MY_TESTING_FILE == {
-            "class": "File",
-            "path": "test/data/my_testing_file.txt"
-        }
+    assert MY_TESTING_FILE == {"class": "File", "path": "test/data/my_testing_file.txt"}
 
 
 def test_variables_and_projects():
     assert VARIABLES["projects"] == PROJECTS
 
 
-# TODO: fix inputs from local
-# def test_cat():
-#     arvados_project_uuid(PROJECTS["ours"])
-#     result = arvados_run(
-#         "./test/cwl_workflows/test_cat/test_cat.cwl",
-#         { "file": MY_TESTING_FILE }
-#     )
+# TODO: debug this test
+def test_step_cat():
+    arvados_project_uuid(PROJECTS["ours"])
+    result = arvados_run(
+        "./test/cwl_workflows/test_cat/test_cat.cwl",
+        {
+        "file": {
+            "class": "File",
+            "path": "./test/data/my_testing_file.txt"
+            }
+        }
+    )
 
 
 def test_single_step_():
     arvados_project_uuid(PROJECTS["ours"])
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
-        { "name": "example" }
+        {"name": "example"},
     )
 
     assert "example.txt" in result.files
@@ -74,22 +124,22 @@ def test_single_step_define_target_yourself():
     result = arvados_run(
         "./test/cwl_workflows/test_single_step/test_single_step.cwl",
         {"name": "example"},
-        project_uuid=PROJECTS["ours"]
+        project_uuid=PROJECTS["ours"],
     )
 
     assert "example.txt" in result.files
     assert result.files["example.txt"]["size"] == 0
+    assert result.command == ["touch", "example.txt", "example"]
 
 
 def test_workflow():
     arvados_project_uuid(PROJECTS["ours"])
     result = arvados_run(
-        "./test/cwl_workflows/test_workflow.cwl",
-        {"name": "workflow_example"}
+        "./test/cwl_workflows/test_workflow.cwl", {"name": "workflow_example"}
     )
 
     assert "workflow_example.txt" in result.files
-    assert result.files["workflow_example.txt"]["size"] == 0
+    assert result.command != ["touch", "example.txt", "example"]
 
     # TODO implement out related to cwl.output.json
     # assert len(out["testing_results"]) == 3

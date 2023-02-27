@@ -1,9 +1,9 @@
 import contextlib
 from functools import lru_cache
 from typing import Dict
+from pathlib import Path
 
 import yaml
-import os
 import json
 import tempfile
 
@@ -32,13 +32,27 @@ def load_file(path: str) -> list:
     return lines
 
 
-def get_cwl_name_from_path(cwl_path):
-    pathname = os.path.splitext(cwl_path)[0]
-    return os.path.basename(pathname)
+def change_path_in_values(item_dict: dict) -> dict:
+    result = item_dict.copy()
+
+    if "path" in item_dict:
+        if not item_dict["path"].startswith("keep:"):
+            result["path"] = str(Path(result["path"]).resolve())
+    return result
 
 
-def pwd(path_to_file):
-    return os.path.dirname(os.path.abspath(path_to_file))
+def change_local_paths_to_abs(inputs_dictionary: dict = None) -> dict:
+    result = inputs_dictionary.copy()
+    if inputs_dictionary:
+        for key, values in inputs_dictionary.items():
+            if isinstance(values, dict):
+                result[key] = change_path_in_values(result[key])
+            elif isinstance(values, list):
+                items = []
+                for item in range(0, len(values)):
+                    items.append(change_path_in_values(result[key][item]))
+                result[key] = items
+    return result
 
 
 @contextlib.contextmanager
@@ -48,12 +62,8 @@ def create_input_yml(inputs_dictionary: Dict = None):
     """
     with tempfile.NamedTemporaryFile(mode="w") as file:
         if inputs_dictionary:
-            yaml.dump(inputs_dictionary, file)
+            yaml.dump(change_local_paths_to_abs(inputs_dictionary), file)
         yield file.name
-
-
-def create_dict_for_input_file(name: str, resources) -> dict:
-    return {"class": "File", "path": os.path.join(resources, name)}
 
 
 @lru_cache
