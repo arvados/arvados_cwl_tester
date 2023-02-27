@@ -1,7 +1,10 @@
-# Arvados CWL Tester
-## Framework for testing Common Workflow Language on Arvados
+# Arvados CWL Tester 
 
 ![Beta](https://img.shields.io/badge/Status-Beta-yellow)
+
+**Framework for testing Common Workflow Language on Arvados**
+
+<img src="https://www.linkpicture.com/q/tester_2.png" alt="logo" width="200"/>
 
 **Arvados CWL Tester** is an open-source testing framework that allows you to write and manage reproducible e2e CWL tests and execute them on Arvados (more information about Arvados can be find [here](https://arvados.org/)). 
 It supports parallel execution of multiple e2e tests on Arvados. 
