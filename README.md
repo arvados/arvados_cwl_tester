@@ -69,7 +69,7 @@ There is an optional feature implemented in this framework that helps to organiz
 
 ```json
 {
-  "prica": "prica-*******************82",
+  "pirca": "pirca-*******************82",
   "dirs": {
     "fastq_collection": {
       "type": "Directory",
