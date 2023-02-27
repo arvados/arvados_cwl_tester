@@ -5,6 +5,7 @@
 
 **Arvados CWL Tester** is an open-source testing framework that allows you to write and manage reproducible e2e CWL tests and execute them on Arvados (more information about Arvados can be find [here](https://arvados.org/)). 
 It supports parallel execution of multiple e2e tests on Arvados. 
+
 Every executed test creates a separate Project on Arvados and starts a process inside this Project.
 Projects are then automatically removed after one week which helps to keep your testing space clean and tidy. 
 
@@ -135,6 +136,7 @@ $ source venv/bin/activate
 ## Authors
 
 **Monika Krzyzanowska** [monigenomi](https://github.com/monigenomi), e-mail: monigenomi@gmail.com
+
 **Joana Butkiewicz** [joanna-butkiewicz]https://github.com/joanna-butkiewicz
 
 ## Licensing
