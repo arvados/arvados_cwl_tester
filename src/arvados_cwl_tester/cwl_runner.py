@@ -2,6 +2,7 @@ from io import StringIO
 from typing import Dict
 import os
 
+import arvados
 import arvados_cwl
 
 from arvados_cwl_tester.helpers import create_input_yml
@@ -26,10 +27,12 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary: Dict, project_id, test_nam
             filename,
         ]
         print(args)
+        api = arvados.api('v1')
         exit_code = arvados_cwl.main(
             args,
             stdout=output,
             stderr=error,
+            api_client=api,
             install_sig_handlers=False,  # to work with parallel testing
         )
     error = error.getvalue()
