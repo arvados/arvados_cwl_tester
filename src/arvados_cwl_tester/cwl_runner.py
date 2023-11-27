@@ -1,17 +1,11 @@
-from io import StringIO
+import subprocess
 from typing import Dict
-import os
 
-import arvados
-import arvados_cwl
-
-from arvados_cwl_tester.helpers import create_input_yml
 from arvados_cwl_tester.helpers import Colors
+from arvados_cwl_tester.helpers import create_input_yml
 
 
 def run_cwl_arvados(cwl_path: str, inputs_dictionary: Dict, project_id, test_name):
-    output = StringIO()
-    error = StringIO()
     with create_input_yml(inputs_dictionary) as filename:
         print(Colors.OKBLUE + f"Process '{test_name}' is starting...")
         args = [
@@ -27,15 +21,12 @@ def run_cwl_arvados(cwl_path: str, inputs_dictionary: Dict, project_id, test_nam
             filename,
         ]
         print(args)
-        api = arvados.api('v1')
-        exit_code = arvados_cwl.main(
-            args,
-            stdout=output,
-            stderr=error,
-            api_client=api,
-            install_sig_handlers=False,  # to work with parallel testing
-        )
-    error = error.getvalue()
-    if error or exit_code:
-        print(error)
-        return
+        try:
+            run_cwl = subprocess.run([
+                'arvados-cwl-runner',
+                *args
+            ], check=True, capture_output=True)
+            print(run_cwl.stdout.decode())
+            print(run_cwl.stderr.decode())
+        except subprocess.CalledProcessError as e:
+            print(e.stderr.decode())
